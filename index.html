@@ -1,0 +1,330 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Score Atleta Evolutivo V7 — CTP, CTD, Reflexão e Microfone Mobile</title>
+<style>
+:root{--bg:#06111f;--card:#111f33;--card2:#172842;--line:rgba(255,255,255,.12);--txt:#f8fafc;--muted:#9fb0c8;--g:#18b66f;--b:#3b82f6;--p:#8b5cf6;--r:#ef4444;--y:#f59e0b}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top,#172554,#06111f 42%,#020617);color:var(--txt);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;max-width:850px;margin-inline:auto;padding:10px 10px 88px;user-select:none;-webkit-tap-highlight-color:transparent}
+button,input,textarea,select{font:inherit}button{border:0;color:var(--txt);font-weight:900;touch-action:manipulation}button:active{transform:scale(.98)}
+input,textarea,select{width:100%;background:rgba(15,23,42,.88);border:1px solid var(--line);color:var(--txt);border-radius:14px;padding:12px;min-height:48px;outline:none}option{color:#111}textarea{min-height:95px;resize:vertical;user-select:text}
+label{display:block;color:var(--muted);font-size:12px;font-weight:900;text-transform:uppercase;margin:0 0 6px;letter-spacing:.05em}
+h1,h2,h3{margin:0}h1{font-size:19px}h2{font-size:18px}.small{color:var(--muted);font-size:12px;line-height:1.3}
+.top{position:sticky;top:0;z-index:30;margin:0 -10px 10px;padding:10px;background:rgba(6,17,31,.94);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:10px}
+.panel{background:rgba(17,31,51,.9);border:1px solid var(--line);border-radius:18px;padding:13px;margin-bottom:10px;box-shadow:0 12px 32px rgba(0,0,0,.28)}
+.row{display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:10px}.two{grid-template-columns:1fr 1fr}.flex{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.between{justify-content:space-between}
+.btn{border-radius:15px;min-height:48px;padding:12px 14px;background:rgba(255,255,255,.08);border:1px solid var(--line)}.primary{background:linear-gradient(180deg,#2563eb,#1d4ed8)}.good{background:linear-gradient(180deg,#16a34a,#15803d)}.danger{background:linear-gradient(180deg,#ef4444,#b91c1c)}.warn{background:linear-gradient(180deg,#f59e0b,#d97706);color:#1c1201}.ghost{background:rgba(255,255,255,.08)}
+.pill{border:1px solid var(--line);background:rgba(255,255,255,.08);border-radius:999px;padding:6px 9px;font-size:12px;font-weight:900;white-space:nowrap}
+.screen{display:none}.screen.on{display:block}
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:40;background:rgba(6,17,31,.96);backdrop-filter:blur(14px);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);gap:7px;padding:8px 8px calc(8px + env(safe-area-inset-bottom))}
+.nav button{min-height:54px;border-radius:14px;background:rgba(255,255,255,.07);color:var(--muted);font-size:12px}.nav button.on{background:rgba(59,130,246,.22);border:1px solid rgba(59,130,246,.35);color:#dbeafe}
+.attGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.att{min-height:64px;border-radius:16px;background:rgba(239,68,68,.18);border:1px solid rgba(239,68,68,.32);padding:8px;text-align:left}.att.ok{background:rgba(24,182,111,.18);border-color:rgba(24,182,111,.38)}.att b{display:block;font-size:17px;line-height:1.05}.att span{font-size:11px;color:var(--muted)}
+.scoreTop{position:sticky;top:66px;z-index:20;background:rgba(6,17,31,.94);backdrop-filter:blur(12px);padding:8px 0;border-bottom:1px solid var(--line);margin-bottom:8px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}.stat{background:rgba(255,255,255,.07);border:1px solid var(--line);border-radius:14px;padding:7px;text-align:center}.stat b{display:block;font-size:17px}.stat span{font-size:10px;color:var(--muted);font-weight:900}
+.scoreGrid{display:grid;grid-template-columns:repeat(var(--cols,3),minmax(0,1fr));gap:7px}.tile{background:rgba(17,31,51,.95);border:1px solid var(--line);border-radius:16px;overflow:hidden}.tileTop{min-height:43px;padding:7px;display:flex;gap:5px;justify-content:space-between}.nm{font-size:14px;font-weight:1000;line-height:1.05;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}.tot{font-size:18px;font-weight:1000;background:rgba(255,255,255,.08);border-radius:11px;padding:5px 7px;align-self:flex-start}.pts{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line)}.pt{min-height:52px;font-size:18px}.one{background:linear-gradient(180deg,var(--g),#128a55)}.three{background:linear-gradient(180deg,var(--p),#6541d9)}
+.listRow{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;background:rgba(255,255,255,.055);border:1px solid var(--line);border-radius:14px;padding:9px;margin-bottom:7px}.rank{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(245,158,11,.18);color:#ffd28a;font-weight:1000}.report{white-space:pre-wrap;background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:15px;padding:12px;line-height:1.38;user-select:text}.empty{border:1px dashed var(--line);border-radius:16px;padding:16px;text-align:center;color:var(--muted);background:rgba(255,255,255,.035)}
+.smallBtn{min-height:40px;border-radius:12px;background:rgba(255,255,255,.08);border:1px solid var(--line);padding:8px}
+.voicePanel{background:linear-gradient(180deg,rgba(59,130,246,.16),rgba(17,31,51,.92));border:1px solid rgba(59,130,246,.35);border-radius:18px;padding:13px;margin-bottom:10px;box-shadow:0 12px 32px rgba(0,0,0,.22)}
+.voiceState{display:inline-flex;align-items:center;gap:7px;border-radius:999px;padding:7px 10px;font-size:12px;font-weight:1000;border:1px solid var(--line);background:rgba(255,255,255,.07)}
+.voiceState.listening{background:rgba(24,182,111,.18);border-color:rgba(24,182,111,.45);color:#bbf7d0}.voiceState.restarting{background:rgba(245,158,11,.18);border-color:rgba(245,158,11,.45);color:#fde68a}.voiceState.error{background:rgba(239,68,68,.18);border-color:rgba(239,68,68,.45);color:#fecaca}
+.voiceLast{margin-top:9px;padding:10px 12px;border-radius:14px;background:rgba(2,6,23,.48);border:1px solid var(--line);min-height:44px;line-height:1.35}
+.voiceLog{margin-top:8px;display:grid;gap:5px}.voiceLog div{font-size:12px;color:#dbeafe;padding:6px 8px;border-radius:10px;background:rgba(255,255,255,.05)}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:99;display:none;align-items:flex-end;padding:10px}.modal.on{display:flex}.box{width:100%;max-width:850px;margin:0 auto;background:#0b1728;border:1px solid var(--line);border-radius:22px;padding:14px;max-height:86vh;overflow:auto}
+@media(max-width:370px){.attGrid{grid-template-columns:1fr}.nm{font-size:13px}.pt{min-height:49px}.stats{gap:5px}.stat{padding:6px 4px}}
+</style>
+</head>
+<body>
+<header class="top"><div><h1>Score Atleta Evolutivo</h1><div id="sub" class="small">CTP • CTD • acompanhamento por evidências</div></div><button class="btn" id="gear">⚙️</button></header>
+
+<section id="home" class="screen on">
+<div class="panel">
+ <div class="row two"><div><label>Data</label><input id="date" type="date"></div><div><label>Treinador</label><input id="coach" placeholder="Ex.: Felipe"></div></div>
+ <div class="row two"><div><label>Turma</label><select id="classSel"></select></div><div><label>Grade</label><select id="cols"><option>2</option><option selected>3</option><option>4</option><option>5</option></select></div></div>
+ <div class="row"><div><label>Tema do treino</label><input id="theme" placeholder="Ex.: Passe entre linhas"></div></div>
+ <div class="row"><div><label>Diagnóstico do treinador / objetivo</label><textarea id="obs" placeholder="Opcional. Ex.: melhorar leitura do espaço entre linhas."></textarea></div></div>
+ <button id="goCall" class="btn primary" style="width:100%">Fazer chamada</button>
+</div>
+<div class="panel"><div class="flex between"><h2>Cadastro</h2><span class="pill" id="cadResumo">0 atletas</span></div><div id="classesResumo"></div></div>
+</section>
+
+<section id="call" class="screen">
+<div class="panel"><div class="flex between"><div><h2>Chamada</h2><div id="callInfo" class="small">—</div></div><span id="presentPill" class="pill">0 presentes</span></div>
+<div class="flex"><button id="allPresent" class="btn good">Todos presentes</button><button id="allAbsent" class="btn ghost">Todos faltaram</button><button id="quickAdd" class="btn warn">+ atleta</button></div></div>
+<div id="attGrid" class="attGrid"></div>
+<div class="panel"><button id="goScore" class="btn primary" style="width:100%">Iniciar pontuação</button></div>
+</section>
+
+<section id="voiceNames" class="screen">
+<div class="panel"><h2>Nomes repetidos na chamada</h2><div class="small">Há atletas presentes com o mesmo primeiro nome. Antes da pontuação, defina um apelido de voz para evitar lançar pontos na criança errada. O nome oficial do cadastro não será alterado.</div></div>
+<div id="dupGroups"></div>
+<div class="panel"><div class="flex"><button id="backToCall" class="btn ghost">Voltar à chamada</button><button id="saveVoiceNames" class="btn primary" style="flex:1">Salvar e iniciar pontuação</button></div></div>
+</section>
+
+<section id="score" class="screen">
+<div class="scoreTop">
+ <div class="flex between"><div><h2 id="scoreTitle">Pontuação</h2><div id="scoreTema" class="small">—</div></div><button id="finish" class="btn primary">Evidências</button></div>
+ <div class="stats"><div class="stat"><b id="stPres">0</b><span>presentes</span></div><div class="stat"><b id="stTotal">0</b><span>pontos</span></div><div class="stat"><b id="stOne">0</b><span>CTP +1</span></div><div class="stat"><b id="stThree">0</b><span>CTD +3</span></div></div>
+ <div class="flex" style="margin-top:8px"><button id="undo" class="btn ghost">↩ desfazer</button><button id="editPresence" class="btn ghost">editar presença</button><button id="editVoiceNames" class="btn ghost">apelidos de voz</button></div>
+</div>
+<div class="voicePanel">
+ <div class="flex between">
+  <div><h2>🎙️ Modo Quadra por voz</h2><div id="voiceState" class="voiceState">⚫ Escuta parada</div></div>
+  <button id="voiceToggle" class="btn good">🎙️ Iniciar escuta</button>
+ </div>
+ <div class="flex" style="margin-top:8px">
+  <button id="micTest" class="smallBtn">🔐 Testar permissão do microfone</button>
+  <span id="micEnv" class="small"></span>
+ </div>
+ <div class="small" style="margin-top:8px">Comandos: <b>“1 ponto para…”</b> = evidência de CTP; <b>“3 pontos para…”</b> = resposta correta / CTD; <b>“[nome] errou a resposta”</b> = tentativa sem acerto; <b>“Pergunta para todos”</b> = abre reflexão coletiva.</div>
+ <div id="reflectionState" class="voiceLast" style="min-height:auto"><span class="small">🧠 Nenhuma reflexão coletiva aberta.</span></div>
+ <div id="voiceLast" class="voiceLast"><span class="small">Nenhum comando de voz ainda.</span></div>
+ <div id="voiceLog" class="voiceLog"></div>
+</div>
+<div id="scoreGrid" class="scoreGrid"></div>
+</section>
+
+<section id="report" class="screen">
+<div class="panel"><div class="flex between"><h2>Evidências do treino</h2><span id="level" class="pill">Registro observacional</span></div>
+<div class="stats"><div class="stat"><b id="rtotal">0</b><span>pontos</span></div><div class="stat"><b id="rctp">0</b><span>atletas c/ CTP</span></div><div class="stat"><b id="rctd">0</b><span>atletas c/ CTD</span></div><div class="stat"><b id="rref">0</b><span>reflexões</span></div></div>
+<div class="panel" style="background:rgba(245,158,11,.12);border-color:rgba(245,158,11,.35);margin-top:10px"><div class="small">Pontuador do dia</div><h1 id="winner">—</h1><div id="winnerDetail" class="small"></div></div>
+<div id="reportText" class="report"></div><div class="flex" style="margin-top:10px"><button id="copy" class="btn ghost">Copiar</button><button id="json" class="btn good">Baixar JSON</button></div></div>
+<div class="panel"><h2>Ranking</h2><div id="ranking"></div></div>
+<div class="panel"><h2>Feedback individual base</h2><div id="parents"></div></div>
+</section>
+
+<section id="settings" class="screen">
+<div class="panel"><h2>Configurações</h2><div class="small">Atletas e turmas ficam salvos neste aparelho. Para aluno que saiu, prefira inativar. Excluir fica disponível para cadastro errado.</div></div>
+<div class="panel"><h2>Turmas</h2><div class="flex"><input id="newClass" placeholder="Ex.: Sub-10"><button id="addClass" class="btn good">Adicionar</button></div><div id="classManage"></div></div>
+<div class="panel"><h2>Adicionar atletas</h2><label>Turma</label><select id="addClassSel"></select><label style="margin-top:10px">Nomes completos</label><textarea id="names" placeholder="Um por linha. Ex.:&#10;Bruno Silva&#10;Bruno Pereira"></textarea><button id="addNames" class="btn good" style="width:100%;margin-top:10px">Adicionar</button></div>
+<div class="panel"><div class="flex between"><h2>Atletas</h2><select id="filterClass" style="max-width:180px"></select></div><div id="athManage"></div></div>
+<div class="panel"><h2>Backup</h2><div class="flex"><button id="exportCad" class="btn primary">Exportar cadastro</button><label class="btn ghost">Importar cadastro<input id="importCad" type="file" accept=".json,application/json" style="display:none"></label></div></div>
+<div class="panel"><button id="reset" class="btn danger" style="width:100%">Limpar cadastro deste aparelho</button></div>
+</section>
+
+<nav class="nav"><button class="on" data-s="home">🏠<br>Início</button><button data-s="call">✅<br>Chamada</button><button data-s="score">🎯<br>Pontos</button><button data-s="report">📋<br>Relatório</button></nav>
+
+<div id="modal" class="modal"><div class="box"><h2>Editar atleta</h2><input type="hidden" id="editId"><label>Nome completo</label><input id="editName"><label>Turma</label><select id="editClass"></select><div class="flex" style="margin-top:10px"><button id="saveEdit" class="btn good">Salvar</button><button id="cancelEdit" class="btn ghost">Cancelar</button></div></div></div>
+
+<script>
+const KEY="score_atleta_evolutivo_v2_persistente";
+const $=id=>document.getElementById(id);
+let data=load(), current=null;
+let voiceRecognition=null, voiceActive=false, voiceStarting=false, voiceRestartTimer=null, wakeLock=null, voiceRecent=[], collectiveTimer=null, lastVoiceRaw="", lastVoiceAt=0;
+function id(){return "ATL-"+Date.now().toString(36).toUpperCase()+"-"+Math.floor(Math.random()*9999)}
+function norm(s){return String(s||"").trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\s+/g," ")}
+function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+function load(){try{let x=JSON.parse(localStorage.getItem(KEY));if(x&&x.classes&&x.athletes)return x}catch(e){}return{classes:["Turma 1","Turma 2"],athletes:[]}}
+function save(){localStorage.setItem(KEY,JSON.stringify(data));renderAll()}
+function today(){let d=new Date();return new Date(d-d.getTimezoneOffset()*60000).toISOString().slice(0,10)}
+function split(n){let p=String(n||"").trim().split(/\s+/).filter(Boolean);return{f:p[0]||"",r:p.slice(1)}}
+function display(a,ctx){let sp=split(a.name),f=sp.f;if(!f)return"Sem nome";let same=ctx.filter(x=>norm(split(x.name).f)==norm(f));if(same.length<=1)return f;if(!sp.r.length)return a.name;let ini=sp.r[0][0].toUpperCase(),sameIni=same.filter(x=>(split(x.name).r[0]||"")[0]?.toUpperCase()==ini);return sameIni.length<=1?`${f} ${ini}.`:`${f} ${sp.r[0]}`}
+function active(cls){return data.athletes.filter(a=>a.className==cls&&a.active!==false).sort((a,b)=>a.name.localeCompare(b.name,"pt-BR"))}
+function all(cls){return data.athletes.filter(a=>a.className==cls).sort((a,b)=>a.name.localeCompare(b.name,"pt-BR"))}
+function show(s){document.querySelectorAll(".screen").forEach(x=>x.classList.remove("on"));$(s).classList.add("on");document.querySelectorAll(".nav button").forEach(b=>b.classList.toggle("on",b.dataset.s==s));$("sub").textContent={home:"CTP • CTD • acompanhamento por evidências",call:"Marque presença e falta",score:"CTP na ação • CTD na reflexão",report:"Evidências observadas no treino",voiceNames:"Resolva nomes repetidos para a voz",settings:"Turmas e atletas fixos"}[s]||"";if(s=="score")renderScore();if(s=="report")renderReport()}
+function renderSelects(){let opts=data.classes.length?data.classes.map(c=>`<option>${esc(c)}</option>`).join(""):'<option value="">Nenhuma turma</option>';["classSel","addClassSel","filterClass","editClass"].forEach(i=>{let e=$(i),v=e.value;e.innerHTML=opts;if(data.classes.includes(v))e.value=v})}
+function renderHome(){let total=data.athletes.filter(a=>a.active!==false).length;$("cadResumo").textContent=total+" atletas ativos";$("classesResumo").innerHTML=data.classes.map(c=>{let n=active(c).length,off=data.athletes.filter(a=>a.className==c&&a.active===false).length;return `<div class=listRow><div class=rank>•</div><div><b>${esc(c)}</b><div class=small>${n} ativos ${off?`· ${off} inativos`:""}</div></div><span class=pill>${n}</span></div>`}).join("")||"<div class=empty>Nenhuma turma.</div>"}
+function renderManage(){ $("classManage").innerHTML=data.classes.map(c=>{let qtd=data.athletes.filter(a=>a.className==c).length;return `<div class=listRow><div class=rank>•</div><div><b>${esc(c)}</b><div class=small>${qtd} atletas</div></div><div class=flex><button class=smallBtn data-ec="${esc(c)}">Editar</button><button class=smallBtn data-dc="${esc(c)}" style="color:#fecaca;border-color:rgba(239,68,68,.38)">Excluir</button></div></div>`}).join("")||"<div class=empty>Nenhuma turma cadastrada.</div>";
+document.querySelectorAll("[data-ec]").forEach(b=>b.onclick=()=>{let old=b.dataset.ec,n=prompt("Novo nome da turma:",old);if(!n||!n.trim())return;n=n.trim();if(data.classes.some(c=>norm(c)==norm(n)&&c!=old))return alert("Turma já existe.");data.classes=data.classes.map(c=>c==old?n:c);data.athletes.forEach(a=>{if(a.className==old)a.className=n});if(current&&current.className==old)current.className=n;save()});
+document.querySelectorAll("[data-dc]").forEach(b=>b.onclick=()=>{let cls=b.dataset.dc,qtd=data.athletes.filter(a=>a.className==cls).length,msg=qtd?`Excluir a turma "${cls}"? Isso também excluirá ${qtd} atleta(s) vinculados a ela. Esta ação não pode ser desfeita.`:`Excluir a turma "${cls}"? Esta ação não pode ser desfeita.`;if(!confirm(msg))return;if(current&&current.className==cls){if(!confirm("Há um treino desta turma em andamento. Excluir a turma também encerrará esse treino na tela. Deseja continuar?"))return;current=null}data.athletes=data.athletes.filter(a=>a.className!=cls);data.classes=data.classes.filter(c=>c!=cls);save();show("settings")});
+let cls=$("filterClass").value||data.classes[0]||"",arr=all(cls),ctx=arr;
+$("athManage").innerHTML=arr.map(a=>`<div class=listRow><div class=rank>${a.active===false?"–":"✓"}</div><div><b>${esc(display(a,ctx))}</b> <span class=small>— ${esc(a.name)}</span><div class=small>${esc(a.className)} · ${a.active===false?"inativo":"ativo"}</div></div><div><button class=smallBtn data-ed="${a.id}">Editar</button><button class=smallBtn data-in="${a.id}">${a.active===false?"Ativar":"Inativar"}</button><button class=smallBtn data-del="${a.id}">Excluir</button></div></div>`).join("")||"<div class=empty>Nenhum atleta nesta turma.</div>";
+document.querySelectorAll("[data-ed]").forEach(b=>b.onclick=()=>openEdit(b.dataset.ed));
+document.querySelectorAll("[data-in]").forEach(b=>b.onclick=()=>{let a=data.athletes.find(x=>x.id==b.dataset.in);if(a){a.active=a.active===false?true:false;save()}});
+document.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{let a=data.athletes.find(x=>x.id==b.dataset.del);if(a&&confirm("Excluir só se foi cadastro errado. Para aluno que saiu, use inativar. Excluir "+a.name+"?")){data.athletes=data.athletes.filter(x=>x.id!=a.id);save()}});
+}
+function renderAll(){renderSelects();renderHome();renderManage();if(current){renderCall();renderScore();}}
+function addNames(cls,text){let names=text.split(/\n|,/).map(x=>x.trim()).filter(Boolean);if(!cls)return alert("Escolha a turma.");if(!names.length)return alert("Digite nomes.");let add=0,dup=0;names.forEach(n=>{if(data.athletes.some(a=>a.className==cls&&norm(a.name)==norm(n))){dup++;return}data.athletes.push({id:id(),name:n,className:cls,active:true,created_at:new Date().toISOString()});add++});save();alert(add+" adicionados"+(dup?` · ${dup} duplicados ignorados`:""))}
+function start(){let cls=$("classSel").value,arr=active(cls),theme=$("theme").value.trim();if(!theme)return alert("Preencha o tema.");if(!arr.length){alert("Cadastre atletas ativos nessa turma.");show("settings");return}current={id:"TREINO-"+Date.now().toString(36).toUpperCase(),date:$("date").value||today(),coach:$("coach").value.trim(),className:cls,theme,obs:$("obs").value.trim(),present:{},scores:{},events:[],voiceAliases:{},pedagogy:{collectiveReflections:[],ctdAttempts:[]},actions:[],activeReflectionId:null};arr.forEach(a=>{current.present[a.id]=true;current.scores[a.id]={one:0,three:0}});renderCall();show("call")}
+function renderCall(){if(!current){$("attGrid").innerHTML="<div class=empty>Inicie um treino.</div>";return}let arr=active(current.className);arr.forEach(a=>{if(!(a.id in current.present))current.present[a.id]=true;if(!current.scores[a.id])current.scores[a.id]={one:0,three:0}});let p=arr.filter(a=>current.present[a.id]).length;$("callInfo").textContent=current.className+" · "+current.theme;$("presentPill").textContent=p+" presentes";$("attGrid").innerHTML=arr.map(a=>`<button class="att ${current.present[a.id]?"ok":""}" data-pr="${a.id}"><b>${esc(display(a,arr))}</b><span>${esc(a.name)} · ${current.present[a.id]?"presente":"faltou"}</span></button>`).join("");document.querySelectorAll("[data-pr]").forEach(b=>b.onclick=()=>{current.present[b.dataset.pr]=!current.present[b.dataset.pr];renderCall()})}
+function present(){if(!current)return[];let arr=active(current.className);return arr.filter(a=>current.present[a.id])}
+function firstName(a){return split(a?.name).f||""}
+function voiceName(a,aliases=current?.voiceAliases||{}){return aliases[a.id]||firstName(a)}
+function duplicateFirstGroups(){let groups={};present().forEach(a=>{let k=norm(firstName(a));if(!k)return;(groups[k]||(groups[k]=[])).push(a)});return Object.values(groups).filter(g=>g.length>1)}
+function voiceNamesUnique(aliases=current?.voiceAliases||{}){let seen=new Set();for(let a of present()){let k=norm(voiceName(a,aliases));if(!k||seen.has(k))return false;seen.add(k)}return true}
+function renderVoiceNames(){if(!current)return;current.voiceAliases=current.voiceAliases||{};let groups=duplicateFirstGroups();if(!groups.length){alert("Não há primeiros nomes repetidos entre os atletas presentes.");return}
+ $("dupGroups").innerHTML=groups.map((g,gi)=>{let first=firstName(g[0]);if(g.length==2){let aliased=g.find(a=>current.voiceAliases[a.id]);let target=aliased?.id||g[0].id,alias=aliased?current.voiceAliases[aliased.id]:"";return `<div class=panel data-dup-pair="${gi}"><h3>${esc(first)} aparece 2 vezes</h3><div class=small style="margin:6px 0 12px">Selecione qual dos dois atletas receberá um apelido apenas para os comandos de voz. O outro continuará respondendo por “${esc(first)}”.</div><label>Atleta que receberá apelido</label><select data-alias-target="${gi}">${g.map(a=>`<option value="${a.id}" ${a.id==target?"selected":""}>${esc(a.name)}</option>`).join("")}</select><label style="margin-top:10px">Apelido de voz</label><input data-alias-value="${gi}" value="${esc(alias)}" placeholder="Ex.: Bruninho, Ferreira, B2"></div>`}
+ return `<div class=panel data-dup-many="${gi}"><h3>${esc(first)} aparece ${g.length} vezes</h3><div class=small style="margin:6px 0 12px">Deixe apenas um atleta sem apelido. Os demais precisam de apelidos de voz diferentes.</div>${g.map(a=>`<div style="margin-bottom:10px"><b>${esc(a.name)}</b><input data-many-id="${a.id}" value="${esc(current.voiceAliases[a.id]||"")}" placeholder="Apelido de voz (deixe só um em branco)"></div>`).join("")}</div>`}).join("")
+}
+function saveVoiceAliases(){let groups=duplicateFirstGroups(),temp={...(current.voiceAliases||{})};for(let gi=0;gi<groups.length;gi++){let g=groups[gi],first=firstName(g[0]);g.forEach(a=>delete temp[a.id]);if(g.length==2){let target=document.querySelector(`[data-alias-target="${gi}"]`).value,alias=document.querySelector(`[data-alias-value="${gi}"]`).value.trim();if(!alias)return alert(`Digite um apelido para um dos atletas chamados ${first}.`);if(norm(alias)==norm(first))return alert(`O apelido precisa ser diferente de “${first}”.`);temp[target]=alias}else{let blanks=0;for(let a of g){let inp=document.querySelector(`[data-many-id="${a.id}"]`),alias=(inp?.value||"").trim();if(!alias){blanks++;continue}if(norm(alias)==norm(first))return alert(`O apelido de ${a.name} precisa ser diferente de “${first}”.`);temp[a.id]=alias}if(blanks!=1)return alert(`Para os atletas chamados ${first}, deixe exatamente um sem apelido.`)}}
+ let used=new Map();for(let a of present()){let spoken=voiceName(a,temp),k=norm(spoken);if(used.has(k))return alert(`O comando de voz “${spoken}” ficou repetido entre ${used.get(k)} e ${a.name}. Escolha outro apelido.`);used.set(k,a.name)}current.voiceAliases=temp;show("score")}
+function goScore(){if(!current)return alert("Inicie um treino.");if(!present().length)return alert("Marque presentes.");if(!voiceNamesUnique()){renderVoiceNames();show("voiceNames");return}show("score")}
+function ensurePedagogy(){if(!current)return null;current.pedagogy=current.pedagogy||{collectiveReflections:[],ctdAttempts:[]};current.pedagogy.collectiveReflections=current.pedagogy.collectiveReflections||[];current.pedagogy.ctdAttempts=current.pedagogy.ctdAttempts||[];current.actions=current.actions||[];return current.pedagogy}
+function currentReflection(){let p=ensurePedagogy();if(!p||!current.activeReflectionId)return null;return p.collectiveReflections.find(r=>r.id==current.activeReflectionId&&!r.closed_at)||null}
+function renderReflectionState(){let el=$("reflectionState");if(!el)return;let r=currentReflection();if(!r){el.innerHTML='<span class="small">🧠 Nenhuma reflexão coletiva aberta.</span>';return}let attempts=(r.attempt_ids||[]).length;el.innerHTML=`<b>🧠 Reflexão coletiva aberta</b><div class=small>${attempts} tentativa(s) registrada(s) • todos os presentes foram expostos à reflexão</div>`}
+function scheduleCollectiveClose(){clearTimeout(collectiveTimer);if(!currentReflection())return;collectiveTimer=setTimeout(()=>closeCollectiveReflection('inatividade'),60000)}
+function openCollectiveReflection(raw='Pergunta para todos'){let p=ensurePedagogy();if(!p)return null;closeCollectiveReflection('nova_reflexao');let r={id:'REF-'+Date.now().toString(36).toUpperCase(),type:'collective',opened_at:new Date().toISOString(),closed_at:null,close_reason:null,present_ids:present().map(a=>a.id),attempt_ids:[],trigger:raw};p.collectiveReflections.push(r);current.activeReflectionId=r.id;current.actions.push({kind:'collective_open',reflection_id:r.id,at:r.opened_at});renderReflectionState();scheduleCollectiveClose();return r}
+function closeCollectiveReflection(reason='encerrada'){clearTimeout(collectiveTimer);let r=currentReflection();if(!r){if(current)current.activeReflectionId=null;renderReflectionState();return}r.closed_at=new Date().toISOString();r.close_reason=reason;current.activeReflectionId=null;renderReflectionState()}
+function registerCtdAttempt(aid,correct,source,raw='',addAction=true){let p=ensurePedagogy(),a=data.athletes.find(x=>x.id==aid);if(!p||!a)return null;let r=source==='collective_spontaneous'?currentReflection():null;let attempt={id:'CTD-'+Date.now().toString(36).toUpperCase()+'-'+Math.floor(Math.random()*9999),athlete_id:aid,athlete_name:a.name,correct:!!correct,source,reflection_id:r?.id||null,at:new Date().toISOString(),raw};p.ctdAttempts.push(attempt);if(r){r.attempt_ids=r.attempt_ids||[];r.attempt_ids.push(attempt.id);scheduleCollectiveClose()}if(addAction)current.actions.push({kind:'ctd_attempt',attempt_id:attempt.id,at:attempt.at});renderReflectionState();return attempt}
+function removeCtdAttempt(attemptId){let p=ensurePedagogy();if(!p)return;let idx=p.ctdAttempts.findIndex(a=>a.id==attemptId);if(idx<0)return;let at=p.ctdAttempts[idx];p.ctdAttempts.splice(idx,1);if(at.reflection_id){let r=p.collectiveReflections.find(x=>x.id==at.reflection_id);if(r)r.attempt_ids=(r.attempt_ids||[]).filter(id=>id!=attemptId)}renderReflectionState()}
+function renderScore(){if(!current)return;ensurePedagogy();$("scoreTitle").textContent=current.className;$("scoreTema").textContent=current.theme;$("scoreGrid").style.setProperty("--cols",$("cols").value||3);let arr=present();$("scoreGrid").innerHTML=arr.map(a=>{let s=current.scores[a.id]||{one:0,three:0},t=s.one+s.three*3;return `<div class=tile><div class=tileTop><div class=nm>${esc(display(a,arr))}</div><div class=tot id="t_${a.id}">${t}</div></div><div class=pts><button class="pt one" data-add="${a.id}" data-type=one>+1</button><button class="pt three" data-add="${a.id}" data-type=three>+3</button></div></div>`}).join("")||"<div class=empty>Nenhum presente.</div>";document.querySelectorAll("[data-add]").forEach(b=>b.onclick=()=>point(b.dataset.add,b.dataset.type,false));live();renderReflectionState();setVoiceUI(voiceActive?"listening":"off",voiceActive?"Ouvindo continuamente":"Escuta parada")}
+function point(aid,type,fromVoice=false,meta={}){if(!current)return;if(type==='one'&&currentReflection())closeCollectiveReflection('retorno_ao_jogo');let s=current.scores[aid]||(current.scores[aid]={one:0,three:0}),attempt=null;if(type==='three'){let source=meta.ctdSource||(currentReflection()?'collective_spontaneous':'manual_unclassified');attempt=registerCtdAttempt(aid,true,source,meta.raw||'',false)}s[type]++;let ev={id:'EV-'+Date.now().toString(36).toUpperCase()+'-'+Math.floor(Math.random()*9999),athlete_id:aid,type,value:type=="one"?1:3,at:new Date().toISOString(),from_voice:!!fromVoice};if(attempt)ev.ctd_attempt_id=attempt.id;current.events.push(ev);current.actions.push({kind:'score',event_id:ev.id,at:ev.at});let el=$("t_"+aid);if(el)el.textContent=s.one+s.three*3;live();if(navigator.vibrate)navigator.vibrate(15);return ev}
+function undo(){if(!current)return;ensurePedagogy();let act=current.actions?.pop();if(!act){let e=current.events.pop();if(!e)return;let s=current.scores[e.athlete_id];if(s&&s[e.type]>0)s[e.type]--;renderScore();return}if(act.kind==='score'){let idx=current.events.findIndex(e=>e.id==act.event_id),e=idx>=0?current.events[idx]:null;if(e){current.events.splice(idx,1);let sc=current.scores[e.athlete_id];if(sc&&sc[e.type]>0)sc[e.type]--;if(e.ctd_attempt_id)removeCtdAttempt(e.ctd_attempt_id)}}else if(act.kind==='ctd_attempt'){removeCtdAttempt(act.attempt_id)}else if(act.kind==='collective_open'){let p=ensurePedagogy(),r=p.collectiveReflections.find(x=>x.id==act.reflection_id);if(r&&!(r.attempt_ids||[]).length){p.collectiveReflections=p.collectiveReflections.filter(x=>x.id!=r.id);if(current.activeReflectionId==r.id)current.activeReflectionId=null}}renderScore()}
+function setVoiceUI(state,msg){
+ let el=$("voiceState"),btn=$("voiceToggle");if(!el||!btn)return;
+ el.className="voiceState"+(state=="listening"?" listening":state=="restarting"?" restarting":state=="error"?" error":"");
+ el.textContent=(state=="listening"?"🟢 ":state=="restarting"?"🟡 ":state=="error"?"🔴 ":"⚫ ")+(msg||"Escuta parada");
+ btn.textContent=voiceActive?"⏸ Pausar escuta":"🎙️ Iniciar escuta";
+ btn.className="btn "+(voiceActive?"warn":"good");
+}
+function addVoiceLog(text){
+ voiceRecent.unshift(text);voiceRecent=voiceRecent.slice(0,4);let el=$("voiceLog");if(el)el.innerHTML=voiceRecent.map(x=>`<div>${esc(x)}</div>`).join("");
+}
+function voiceDictionary(){
+ return present().map(a=>({athlete:a,spoken:voiceName(a),key:norm(voiceName(a))})).filter(x=>x.key).sort((a,b)=>b.key.length-a.key.length);
+}
+function findAthletesInVoiceSegment(segment){
+ let txt=" "+norm(segment).replace(/[^a-z0-9ç ]/gi," ").replace(/\s+/g," ")+" ",dict=voiceDictionary(),hits=[];
+ for(let d of dict){let phrase=" "+d.key+" ";let pos=txt.indexOf(phrase);while(pos>=0){hits.push({pos,athlete:d.athlete,spoken:d.spoken});txt=txt.slice(0,pos)+" ".repeat(phrase.length)+txt.slice(pos+phrase.length);pos=txt.indexOf(phrase)}}
+ return hits.sort((a,b)=>a.pos-b.pos);
+}
+function parseVoiceCommand(raw){
+ if(!current||!raw)return 0;let t=norm(raw);if(!t)return 0;let now=Date.now();if(t===lastVoiceRaw&&now-lastVoiceAt<1200)return 0;lastVoiceRaw=t;lastVoiceAt=now;
+ if(/\bdesfazer( ultimo)?( ponto|registro)?\b/.test(t)){undo();$("voiceLast").innerHTML='<b>↩ Último registro desfeito</b>';addVoiceLog('↩ Último registro desfeito por voz');return 1}
+ let handled=0,summary=[];
+ if(/\bpergunta\s+(?:para|pra)\s+todos\b/.test(t)){let r=openCollectiveReflection(raw);if(r){summary.push('🧠 Pergunta para todos');handled++}t=t.replace(/\bpergunta\s+(?:para|pra)\s+todos\b/g,' ').trim()}
+ let errRe=/\berrou\s+(?:a\s+)?resposta\b/g,errs=[...t.matchAll(errRe)];
+ for(let i=0;i<errs.length;i++){
+  let m=errs[i],segStart=i?errs[i-1].index+errs[i-1][0].length:0,seg=t.slice(segStart,m.index),hits=findAthletesInVoiceSegment(seg);if(!hits.length)continue;let h=hits[hits.length-1],source=currentReflection()?'collective_spontaneous':'directed';registerCtdAttempt(h.athlete.id,false,source,raw,true);summary.push(`${h.athlete.name}: resposta não correta`);handled++
+ }
+ let pointRe=/(?:\b1\b|\bum\b)\s+ponto(?:s)?\s+(?:para|pra)\s+|(?:\b3\b|\btres\b)\s+ponto(?:s)?\s+(?:para|pra)\s+/g,ms=[...t.matchAll(pointRe)],launched=0;
+ for(let i=0;i<ms.length;i++){
+  let m=ms[i],start=m.index+m[0].length,nextPoint=i+1<ms.length?ms[i+1].index:t.length,nextErr=errs.find(e=>e.index>start)?.index??t.length,end=Math.min(nextPoint,nextErr),seg=t.slice(start,end),value=/^(?:1|um)\s+ponto/.test(m[0])?1:3,hits=findAthletesInVoiceSegment(seg),seen=new Set();
+  for(let h of hits){if(seen.has(h.athlete.id))continue;seen.add(h.athlete.id);let meta={raw};if(value===3)meta.ctdSource=currentReflection()?'collective_spontaneous':'directed';point(h.athlete.id,value==1?'one':'three',true,meta);summary.push(`${h.athlete.name} +${value}${value===1?' (CTP)':' (CTD)'}`);launched++;handled++}
+ }
+ if(handled){$("voiceLast").innerHTML=`<b>✅ ${esc(summary.join(' · '))}</b><div class=small>Ouvido: ${esc(raw)}</div>`;addVoiceLog('✅ '+summary.join(' · '));voiceBeep(Math.max(1,launched));renderReflectionState()}else if(/ponto|resposta|pergunta/.test(t)){$("voiceLast").innerHTML=`<b>⚠️ Comando ouvido, mas não foi possível associá-lo a um atleta.</b><div class=small>${esc(raw)}</div>`;addVoiceLog('⚠️ Não reconhecido: '+raw)}
+ return handled;
+}
+function voiceBeep(count=1){
+ try{let AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;let c=new AC(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=count>1?880:740;g.gain.setValueAtTime(.035,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.09);o.start();o.stop(c.currentTime+.1);setTimeout(()=>c.close(),160)}catch(e){}
+}
+async function requestWakeLock(){
+ try{if('wakeLock' in navigator&&document.visibilityState==='visible'){wakeLock=await navigator.wakeLock.request('screen');wakeLock.addEventListener('release',()=>{wakeLock=null})}}catch(e){}
+}
+async function releaseWakeLock(){try{if(wakeLock){await wakeLock.release();wakeLock=null}}catch(e){}}
+
+function micEnvironmentText(){
+ let proto=location.protocol||'',host=location.host||'';
+ if(window.isSecureContext)return `✅ Ambiente seguro: ${host||proto}`;
+ if(proto==='file:')return '⚠️ Arquivo local: publique em HTTPS para usar voz no celular.';
+ return `⚠️ Ambiente não seguro (${proto||'desconhecido'}). Use um endereço HTTPS.`;
+}
+
+function refreshMicEnvironment(){
+ let el=$("micEnv");if(el)el.textContent=micEnvironmentText();
+}
+
+async function requestMicrophonePermission(showOk=true){
+ refreshMicEnvironment();
+ if(!window.isSecureContext){
+   alert('O Modo Quadra por voz precisa ser aberto por um endereço HTTPS. Este arquivo está aberto localmente ou dentro de uma prévia. Publique o arquivo e abra o link https:// no Chrome do celular.');
+   return false;
+ }
+ if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
+   alert('Este navegador não disponibilizou o acesso direto ao microfone. Abra o aplicativo no Google Chrome atualizado.');
+   return false;
+ }
+ try{
+   let stream=await navigator.mediaDevices.getUserMedia({audio:true});
+   stream.getTracks().forEach(t=>t.stop());
+   if(showOk)alert('Microfone autorizado. Agora o Modo Quadra pode iniciar a escuta.');
+   return true;
+ }catch(e){
+   let name=e?.name||'';
+   if(name==='NotAllowedError'||name==='PermissionDeniedError'){
+     alert('O microfone foi bloqueado para este site. No Chrome, toque no ícone ao lado do endereço → Permissões → Microfone → Permitir. Depois volte e toque em “Testar permissão do microfone”.');
+   }else if(name==='NotFoundError'||name==='DevicesNotFoundError'){
+     alert('Nenhum microfone foi encontrado neste aparelho.');
+   }else{
+     alert('Não consegui acessar o microfone neste navegador. Abra o link HTTPS no Chrome e tente novamente.');
+   }
+   return false;
+ }
+}
+
+function buildRecognition(){
+ let SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR)return null;let r=new SR();r.lang='pt-BR';r.continuous=true;r.interimResults=false;r.maxAlternatives=1;
+ r.onstart=()=>{voiceStarting=false;if(voiceActive)setVoiceUI('listening','Ouvindo continuamente')};
+ r.onresult=e=>{for(let i=e.resultIndex;i<e.results.length;i++){if(!e.results[i].isFinal)continue;let raw=e.results[i][0].transcript.trim();if(raw)parseVoiceCommand(raw)}};
+ r.onerror=e=>{voiceStarting=false;if(!voiceActive)return;if(e.error==='not-allowed'||e.error==='service-not-allowed'){voiceActive=false;setVoiceUI('error','Microfone não autorizado');releaseWakeLock();alert('Permita o uso do microfone no navegador para usar o Modo Quadra.');return}if(e.error==='audio-capture'){setVoiceUI('error','Microfone indisponível');return}if(e.error!=='aborted'&&e.error!=='no-speech')setVoiceUI('restarting','Reconectando escuta')};
+ r.onend=()=>{voiceStarting=false;if(voiceActive){setVoiceUI('restarting','Reiniciando escuta');clearTimeout(voiceRestartTimer);voiceRestartTimer=setTimeout(()=>startRecognitionSession(),180)}else setVoiceUI('off','Escuta pausada')};return r;
+}
+function startRecognitionSession(){if(!voiceActive||voiceStarting)return;if(!voiceRecognition)voiceRecognition=buildRecognition();if(!voiceRecognition){voiceActive=false;setVoiceUI('error','Reconhecimento de voz não disponível');alert('Este navegador não disponibilizou reconhecimento de voz. Teste no Chrome/Android atualizado.');return}try{voiceStarting=true;voiceRecognition.start()}catch(e){voiceStarting=false;clearTimeout(voiceRestartTimer);voiceRestartTimer=setTimeout(()=>startRecognitionSession(),300)}}
+async function startVoice(){
+ if(!current)return alert('Inicie um treino primeiro.');
+ if(!present().length)return alert('Não há atletas presentes.');
+ if(!voiceNamesUnique()){renderVoiceNames();show('voiceNames');return}
+ let ok=await requestMicrophonePermission(false);
+ if(!ok){setVoiceUI('error','Microfone não autorizado');return}
+ voiceActive=true;voiceRecent=[];
+ if($("voiceLog"))$("voiceLog").innerHTML='';
+ setVoiceUI('restarting','Ligando microfone');
+ await requestWakeLock();
+ startRecognitionSession();
+}
+async function stopVoice(){voiceActive=false;clearTimeout(voiceRestartTimer);closeCollectiveReflection('escuta_pausada');try{if(voiceRecognition)voiceRecognition.stop()}catch(e){}await releaseWakeLock();setVoiceUI('off','Escuta pausada')}
+async function toggleVoice(){if(voiceActive)await stopVoice();else await startVoice()}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&voiceActive){requestWakeLock();setTimeout(()=>startRecognitionSession(),250)}});
+function met(){
+ if(!current)return null;let p=ensurePedagogy(),arr=present(),attempts=p?.ctdAttempts||[],refs=p?.collectiveReflections||[];
+ let rows=arr.map(a=>{let s=current.scores[a.id]||{one:0,three:0},tot=s.one+s.three*3,aa=attempts.filter(x=>x.athlete_id==a.id),dir=aa.filter(x=>x.source==='directed'),col=aa.filter(x=>x.source==='collective_spontaneous'),manual=aa.filter(x=>x.source==='manual_unclassified'),exposures=refs.filter(r=>(r.present_ids||[]).includes(a.id)).length;return{id:a.id,name:a.name,display:display(a,arr),className:a.className,one:s.one,three:s.three,total:tot,ctp:s.one,ctdCorrect:s.three,ctdDirectedAttempts:dir.length,ctdDirectedCorrect:dir.filter(x=>x.correct).length,ctdCollectiveAttempts:col.length,ctdCollectiveCorrect:col.filter(x=>x.correct).length,ctdManualCorrect:manual.filter(x=>x.correct).length,collectiveExposures:exposures}});
+ let total=rows.reduce((x,r)=>x+r.total,0),one=rows.reduce((x,r)=>x+r.one,0),three=rows.reduce((x,r)=>x+r.three,0),scored=rows.filter(r=>r.total>0).length,part=rows.length?Math.round(scored/rows.length*100):0,avg=rows.length?+(total/rows.length).toFixed(2):0,ctpAthletes=rows.filter(r=>r.ctp>0).length,ctdAthletes=rows.filter(r=>r.ctdCorrect>0).length;
+ let ranking=rows.slice().sort((a,b)=>b.total-a.total||b.one-a.one||a.name.localeCompare(b.name,'pt-BR')),max=ranking[0]?.total||0,winners=max>0?ranking.filter(r=>r.total==max):[];
+ let directed=attempts.filter(x=>x.source==='directed'),collective=attempts.filter(x=>x.source==='collective_spontaneous');
+ return{rows,total,one,three,scored,part,avg,ranking,winners,present:rows.length,ctpAthletes,ctdAthletes,reflections:refs.length,directedAttempts:directed.length,directedCorrect:directed.filter(x=>x.correct).length,collectiveAttempts:collective.length,collectiveCorrect:collective.filter(x=>x.correct).length,level:'Registro observacional'}
+}
+function live(){let m=met()||{present:0,total:0,one:0,three:0};$("stPres").textContent=m.present;$("stTotal").textContent=m.total;$("stOne").textContent=m.one;$("stThree").textContent=m.three}
+function reportText(m){
+ let win=m.winners.length?m.winners.map(w=>`${w.name} (${w.total} pts)`).join(', '):'sem pontuação registrada';
+ return `Evidências do treino — ${current.className}
+Data: ${current.date}
+Tema: ${current.theme}${current.coach?`
+Treinador: ${current.coach}`:''}${current.obs?`
+Objetivo/observação do treinador: ${current.obs}`:''}
+
+Participaram ${m.present} atletas. O score de gamificação somou ${m.total} pontos; esse total é mantido para motivação e ranking e não deve ser interpretado isoladamente como medida de conhecimento tático.
+
+Conhecimento Tático Processual (CTP): foram registradas ${m.one} ação(ões) taticamente adequada(s) relacionada(s) ao objetivo do treino, distribuídas entre ${m.ctpAthletes} atleta(s). O +1 representa evidência observada na ação durante o treino/jogo.
+
+Conhecimento Tático Declarativo (CTD): foram registradas ${m.three} resposta(s) correta(s), distribuídas entre ${m.ctdAthletes} atleta(s). O +3 representa evidência de compreensão verbalizada em resposta às intervenções do treinador.
+
+Reflexão coletiva: ocorreram ${m.reflections} momento(s) marcado(s) como “pergunta para todos”. Nesses momentos, houve ${m.collectiveAttempts} manifestação(ões) espontânea(s), das quais ${m.collectiveCorrect} tiveram resposta correta registrada. Estar presente na reflexão coletiva representa exposição ao momento de discussão, e não uma tentativa individual.
+
+Intervenções dirigidas: foram registradas ${m.directedAttempts} tentativa(s) individual(is), com ${m.directedCorrect} resposta(s) correta(s). Quando o atleta respondeu sem uma reflexão coletiva aberta, o registro foi tratado como intervenção individual dirigida.
+
+Esta leitura organiza evidências observacionais desta sessão. Ausência de registro não equivale, isoladamente, a ausência de compreensão.
+
+Pontuador do dia: ${win}.`;
+}
+function renderReport(){let m=met();if(!current||!m)return;$("level").textContent='Registro observacional';$("rtotal").textContent=m.total;$("rctp").textContent=m.ctpAthletes;$("rctd").textContent=m.ctdAthletes;$("rref").textContent=m.reflections;$("winner").textContent=m.winners.length?m.winners.map(w=>w.display).join(' / '):'Sem pontuação';$("winnerDetail").textContent=m.winners.length?m.winners.map(w=>`${w.name}: ${w.total} pts · ${w.one} CTP +1 · ${w.three} CTD +3`).join(' | '):'Nenhum ponto registrado.';$("reportText").textContent=reportText(m);$("ranking").innerHTML=m.ranking.map((r,i)=>`<div class=listRow><div class=rank>${i+1}</div><div><b>${esc(r.display)}</b><div class=small>${esc(r.name)} · ${r.one} CTP +1 · ${r.three} CTD +3</div></div><b>${r.total} pts</b></div>`).join('')||'<div class=empty>Sem ranking.</div>';$("parents").innerHTML=m.ranking.map(r=>`<div class=report style="margin-bottom:8px">${esc(individual(r))}</div>`).join('')}
+function individual(r){
+ let a=[];a.push(`${r.name}: esteve presente no treino sobre “${current.theme}”.`);
+ if(r.ctp>0)a.push(`Foram registradas ${r.ctp} evidência(s) de Conhecimento Tático Processual em ações relacionadas ao objetivo da sessão.`);else a.push('Não houve evidência processual individual registrada nesta sessão; isso não deve ser interpretado isoladamente como ausência de compreensão.');
+ if(r.ctdCorrect>0)a.push(`Foram registradas ${r.ctdCorrect} resposta(s) correta(s) como evidência de Conhecimento Tático Declarativo.`);else a.push('Não houve resposta correta de CTD registrada nesta sessão.');
+ if(r.ctdCollectiveAttempts>0)a.push(`Nas reflexões coletivas, manifestou-se espontaneamente ${r.ctdCollectiveAttempts} vez(es), com ${r.ctdCollectiveCorrect} resposta(s) correta(s).`);else if(r.collectiveExposures>0)a.push(`Esteve presente em ${r.collectiveExposures} momento(s) de reflexão coletiva, sem manifestação espontânea individual registrada pelo sistema.`);
+ if(r.ctdDirectedAttempts>0)a.push(`Em intervenções diretamente dirigidas, houve ${r.ctdDirectedAttempts} tentativa(s), com ${r.ctdDirectedCorrect} resposta(s) correta(s).`);
+ a.push('O acompanhamento deve considerar a recorrência dessas evidências ao longo de vários treinos, e não um registro isolado.');return a.join(' ')
+}
+function exportObj(){
+ let m=met(),p=ensurePedagogy(),roster=active(current.className);return{schema_version:'score_atleta_evolutivo_v7',generated_at:new Date().toISOString(),treino:{id:current.id,data:current.date,turma:current.className,treinador:current.coach,tema:current.theme,objetivo_observacao:current.obs},conceitos:{ctp:'+1 = evidência de Conhecimento Tático Processual observada na ação',ctd:'+3 = resposta correta como evidência de Conhecimento Tático Declarativo',reflexao_coletiva:'Pergunta para todos = exposição coletiva; somente quem se manifesta gera tentativa individual'},turma_metricas:{presentes:m.present,total_pontos_gamificacao:m.total,acoes_ctp_qtd:m.one,atletas_com_ctp:m.ctpAthletes,respostas_ctd_corretas_qtd:m.three,atletas_com_ctd:m.ctdAthletes,reflexoes_coletivas_qtd:m.reflections,tentativas_ctd_espontaneas_qtd:m.collectiveAttempts,acertos_ctd_espontaneos_qtd:m.collectiveCorrect,tentativas_ctd_dirigidas_qtd:m.directedAttempts,acertos_ctd_dirigidos_qtd:m.directedCorrect,pontuador_do_dia:m.winners.map(w=>({id:w.id,nome_oficial:w.name,nome_tela:w.display,total_pontos:w.total}))},atletas:roster.map(a=>{let r=m.rows.find(x=>x.id==a.id),pres=!!current.present[a.id];return{id:a.id,nome_oficial:a.name,nome_tela:pres?display(a,present()):display(a,roster),nome_comando_voz:pres?voiceName(a):null,turma:a.className,presente:pres,acoes_ctp_qtd:r?.ctp||0,respostas_ctd_corretas_qtd:r?.ctdCorrect||0,exposicoes_reflexao_coletiva_qtd:r?.collectiveExposures||0,tentativas_ctd_espontaneas_qtd:r?.ctdCollectiveAttempts||0,acertos_ctd_espontaneos_qtd:r?.ctdCollectiveCorrect||0,tentativas_ctd_dirigidas_qtd:r?.ctdDirectedAttempts||0,acertos_ctd_dirigidos_qtd:r?.ctdDirectedCorrect||0,total_pontos_gamificacao:r?.total||0}}),pedagogia:{reflexoes_coletivas:p.collectiveReflections,tentativas_ctd:p.ctdAttempts},eventos_pontuacao:current.events}}
+function down(o,name){let blob=new Blob([JSON.stringify(o,null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),500)}
+function slug(s){return norm(s).replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,50)||"treino"}
+function openEdit(aid){let a=data.athletes.find(x=>x.id==aid);if(!a)return;$("editId").value=a.id;$("editName").value=a.name;$("editClass").value=a.className;$("modal").classList.add("on")}
+function closeEdit(){$("modal").classList.remove("on")}
+
+$("date").value=today();
+document.querySelectorAll(".nav button").forEach(b=>b.onclick=async()=>{if(["call","score","report"].includes(b.dataset.s)&&!current)return alert("Inicie um treino primeiro.");if(voiceActive&&b.dataset.s!="score")await stopVoice();show(b.dataset.s)});
+$("gear").onclick=async()=>{if(voiceActive)await stopVoice();show("settings")};$("goCall").onclick=start;$("goScore").onclick=goScore;$("voiceToggle").onclick=toggleVoice;$("micTest").onclick=()=>requestMicrophonePermission(true);$("editPresence").onclick=async()=>{if(voiceActive)await stopVoice();show("call")};$("backToCall").onclick=()=>show("call");$("saveVoiceNames").onclick=saveVoiceAliases;$("editVoiceNames").onclick=()=>{if(!duplicateFirstGroups().length)return alert("Não há primeiros nomes repetidos entre os atletas presentes.");renderVoiceNames();show("voiceNames")};$("finish").onclick=async()=>{if(voiceActive)await stopVoice();renderReport();show("report")};$("undo").onclick=undo;$("cols").onchange=()=>renderScore();
+$("allPresent").onclick=()=>{if(!current)return;active(current.className).forEach(a=>current.present[a.id]=true);renderCall()};$("allAbsent").onclick=()=>{if(!current)return;active(current.className).forEach(a=>current.present[a.id]=false);renderCall()};
+$("quickAdd").onclick=()=>{if(!current)return;let n=prompt("Nome completo do novo atleta:");if(!n||!n.trim())return;addNames(current.className,n);let a=data.athletes.find(x=>x.className==current.className&&norm(x.name)==norm(n));if(a){current.present[a.id]=true;current.scores[a.id]={one:0,three:0}}renderCall()};
+$("addClass").onclick=()=>{let n=$("newClass").value.trim();if(!n)return alert("Digite a turma.");if(data.classes.some(c=>norm(c)==norm(n)))return alert("Turma já existe.");data.classes.push(n);$("newClass").value="";save()};
+$("addNames").onclick=()=>{addNames($("addClassSel").value,$("names").value);$("names").value=""};$("filterClass").onchange=renderManage;
+$("saveEdit").onclick=()=>{let a=data.athletes.find(x=>x.id==$("editId").value);if(!a)return closeEdit();let n=$("editName").value.trim(),c=$("editClass").value;if(!n)return alert("Digite o nome.");a.name=n;a.className=c;save();closeEdit()};$("cancelEdit").onclick=closeEdit;$("modal").onclick=e=>{if(e.target.id=="modal")closeEdit()};
+$("copy").onclick=async()=>{try{await navigator.clipboard.writeText($("reportText").textContent);alert("Copiado.")}catch(e){alert("Não consegui copiar automaticamente.")}};
+$("json").onclick=()=>{if(!current)return;down(exportObj(),`${current.date}_${slug(current.className)}_${slug(current.theme)}.json`)};
+$("exportCad").onclick=()=>down({schema_version:"cadastro_score_atleta_v2",exported_at:new Date().toISOString(),classes:data.classes,athletes:data.athletes},"cadastro-atletas-evolutivo.json");
+$("importCad").onchange=async e=>{let f=e.target.files[0];if(!f)return;try{let o=JSON.parse(await f.text());if(!o.classes||!o.athletes)throw Error();if(confirm("Importar cadastro e substituir o atual deste aparelho?")){data={classes:o.classes,athletes:o.athletes};save();alert("Cadastro importado.")}}catch(err){alert("Arquivo inválido.")}e.target.value=""};
+$("reset").onclick=()=>{if(confirm("Apagar cadastro salvo neste aparelho?")){localStorage.removeItem(KEY);data=load();current=null;renderAll();show("home")}};
+renderAll();
+refreshMicEnvironment();
+</script></body></html>
