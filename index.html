@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Score Atleta Evolutivo V17.0 — Personal Live + Escolinha</title>
+<title>Score Atleta Evolutivo V17.3 — Voz + Personal Live + Escolinha</title>
 <style>
 :root{--bg:#06111f;--card:#111f33;--card2:#172842;--line:rgba(255,255,255,.12);--txt:#f8fafc;--muted:#9fb0c8;--g:#18b66f;--b:#3b82f6;--p:#8b5cf6;--r:#ef4444;--y:#f59e0b}
 *{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top,#172554,#06111f 42%,#020617);color:var(--txt);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;max-width:850px;margin-inline:auto;padding:10px 10px 88px;user-select:none;-webkit-tap-highlight-color:transparent}
@@ -212,7 +212,7 @@ body.pocketLocked{overflow:hidden;overscroll-behavior:none}
   <span id="micEnv" class="small"></span>
  </div>
  <span class="pocketHint">Modo bolso: mantém a tela ativa, bloqueia os toques e deixa apenas a escuta por voz funcionando. Para sair, é preciso segurar o botão de desbloqueio por 2,5 segundos.</span>
- <div class="small" style="margin-top:8px">Comandos: <b>“1 ponto para…”</b> = CTP; <b>“3 pontos para…”</b> = CTD; <b>“menos 1 ponto para…”</b> = conduta/compromisso; <b>“gol para…”</b> ou <b>“[nome] fez gol”</b> = gol separado do score; <b>“[nome] errou a resposta”</b> = tentativa sem acerto. Na Escolinha, a etapa <b>Explicação</b> é coletiva e as demais são diretas. No <b>Personal</b>, 1 atleta = pergunta direta; 2 ou mais atletas = pergunta para todos.</div>
+ <div class="small" style="margin-top:8px">Comandos: <b>“1 ponto para…”</b> = CTP; <b>“3 pontos para…”</b> ou <b>“[nome] acertou a resposta”</b> = CTD; <b>“menos 1 ponto para…”</b> = conduta/compromisso; <b>“gol para…”</b> ou <b>“[nome] fez gol”</b> = gol separado do score; <b>“[nome] errou a resposta”</b> = tentativa sem acerto. Na Escolinha, a etapa <b>Explicação</b> é coletiva e as demais são diretas. No <b>Personal</b>, 1 atleta = pergunta direta; 2 ou mais atletas = pergunta para todos.</div>
  <div id="reflectionState" class="voiceLast" style="min-height:auto"><span class="small">🧠 Nenhuma reflexão coletiva aberta.</span></div>
  <div id="voiceLast" class="voiceLast"><span class="small">Nenhum comando de voz ainda.</span></div>
  <div id="voiceLog" class="voiceLog"></div>
@@ -272,7 +272,7 @@ body.pocketLocked{overflow:hidden;overscroll-behavior:none}
 
 <script>
 const KEY="score_atleta_evolutivo_v2_persistente";
-const APP_VERSION="17.0";
+const APP_VERSION="17.3";
 const $=id=>document.getElementById(id);
 let data=load(), current=null;
 let voiceRecognition=null, voiceActive=false, voiceStarting=false, voiceRestartTimer=null, wakeLock=null, voiceRecent=[], collectiveTimer=null, lastVoiceRaw="", lastVoiceAt=0;
@@ -322,17 +322,47 @@ function personalLivePayload(statusOverride){
    eventos:personalLiveEventList()
  };
 }
-function personalLivePostIframe(payload){
+function waitMs(ms){return new Promise(r=>setTimeout(r,ms))}
+function personalLiveVerifyJsonp(payload,timeout=7000){
  return new Promise((resolve,reject)=>{
-   let cfg=centralCfg();if(!cfg.url)return reject(new Error('URL da Central não configurada.'));if(!cfg.token)return reject(new Error('Token da Central não configurado.'));if(!navigator.onLine)return reject(new Error('Sem conexão com a internet.'));
-   let req='evePersonal_'+Date.now()+'_'+Math.floor(Math.random()*999999),frame=document.createElement('iframe'),form=document.createElement('form'),done=false,timer;
-   frame.name=req+'_frame';frame.style.cssText='position:fixed;width:1px;height:1px;left:-9999px;top:-9999px;border:0;opacity:0;pointer-events:none';
-   form.method='POST';form.action=cfg.url;form.target=frame.name;form.style.display='none';
-   [['action','personal_live_upsert'],['token',cfg.token],['transport','iframe'],['request_id',req],['payload',JSON.stringify(payload)]].forEach(([name,value])=>{let i=document.createElement('input');i.type='hidden';i.name=name;i.value=value;form.appendChild(i)});
-   function cleanup(){if(done)return;done=true;clearTimeout(timer);window.removeEventListener('message',onMessage);setTimeout(()=>{form.remove();frame.remove()},50)}
-   function onMessage(ev){let m=ev.data;if(!m||m.source!=='central_evolutivo'||m.type!=='personal_live_result'||m.request_id!==req)return;cleanup();let out=m.payload||{};out&&out.ok===true?resolve(out):reject(new Error(out?.error||'Falha ao atualizar Personal Live.'))}
-   window.addEventListener('message',onMessage);document.body.appendChild(frame);document.body.appendChild(form);timer=setTimeout(()=>{cleanup();reject(new Error('A Central não confirmou o Personal Live a tempo.'))},15000);form.submit();
+   let cfg=centralCfg();if(!cfg.url)return reject(new Error('URL da Central não configurada.'));
+   let cb='eveLiveVerify_'+Date.now()+'_'+Math.floor(Math.random()*999999),script=document.createElement('script'),done=false,timer;
+   function finish(err,val){if(done)return;done=true;clearTimeout(timer);try{delete window[cb]}catch(e){window[cb]=undefined}try{script.remove()}catch(e){}err?reject(err):resolve(val)}
+   window[cb]=out=>{if(out&&out.ok===true)finish(null,out);else finish(new Error(out?.error||'A sessão ainda não apareceu na Central.'))};
+   try{let u=new URL(cfg.url);u.searchParams.set('action','personal_live_view');u.searchParams.set('session_id',payload.session_id);u.searchParams.set('view_key',payload.view_key);u.searchParams.set('callback',cb);u.searchParams.set('_',Date.now());script.src=u.toString()}catch(e){return finish(e)}
+   script.onerror=()=>finish(new Error('Não foi possível verificar a sessão na Central.'));timer=setTimeout(()=>finish(new Error('Tempo limite ao verificar o Personal Live.')),timeout);document.head.appendChild(script);
  })
+}
+function personalLiveSnapshotMatches(out,payload){
+ if(!out||out.ok!==true||String(out.session_id||'')!==String(payload.session_id||''))return false;
+ if(String(out.status||'live')!==String(payload.status||'live'))return false;
+ let got=Array.isArray(out.participantes)?out.participantes:[],want=Array.isArray(payload.participantes)?payload.participantes:[];
+ if(got.length!==want.length)return false;
+ let gm=new Map(got.map(x=>[String(x.id),x]));
+ for(let w of want){let g=gm.get(String(w.id));if(!g)return false;for(let k of ['one','three','minus','total','gols'])if(Number(g[k]||0)!==Number(w[k]||0))return false}
+ let ge=Array.isArray(out.eventos)?out.eventos:[],we=Array.isArray(payload.eventos)?payload.eventos:[];
+ if(ge.length!==we.length)return false;
+ if(we.length){let a=ge[ge.length-1]||{},b=we[we.length-1]||{};if(String(a.athlete_id||'')!==String(b.athlete_id||'')||String(a.type||'')!==String(b.type||'')||String(a.at||'')!==String(b.at||''))return false}
+ return true;
+}
+function personalLiveFormFallback(payload){
+ let cfg=centralCfg(),req='evePersonalFallback_'+Date.now()+'_'+Math.floor(Math.random()*999999),frame=document.createElement('iframe'),form=document.createElement('form');
+ frame.name=req+'_frame';frame.style.cssText='position:fixed;width:1px;height:1px;left:-9999px;top:-9999px;border:0;opacity:0;pointer-events:none';form.method='POST';form.action=cfg.url;form.target=frame.name;form.style.display='none';
+ [['action','personal_live_upsert'],['token',cfg.token],['transport','fetch'],['request_id',req],['payload',JSON.stringify(payload)]].forEach(([name,value])=>{let i=document.createElement('input');i.type='hidden';i.name=name;i.value=value;form.appendChild(i)});
+ document.body.appendChild(frame);document.body.appendChild(form);try{form.submit()}catch(e){}setTimeout(()=>{try{form.remove();frame.remove()}catch(e){}},8000);
+}
+async function personalLivePostVerified(payload){
+ let cfg=centralCfg();if(!cfg.url)throw new Error('URL da Central não configurada.');if(!cfg.token)throw new Error('Token da Central não configurado.');if(!navigator.onLine)throw new Error('Sem conexão com a internet.');
+ let body=new URLSearchParams();body.set('action','personal_live_upsert');body.set('token',cfg.token);body.set('transport','fetch');body.set('request_id','evePersonal_'+Date.now()+'_'+Math.floor(Math.random()*999999));body.set('payload',JSON.stringify(payload));
+ let sent=false;
+ try{await fetch(cfg.url,{method:'POST',mode:'no-cors',credentials:'omit',cache:'no-store',redirect:'follow',body});sent=true}catch(e){personalLiveFormFallback(payload);sent=true}
+ if(!sent)throw new Error('Não foi possível enviar o Personal Live.');
+ let lastErr=null;
+ for(let attempt=0;attempt<5;attempt++){
+   await waitMs(650+attempt*450);
+   try{let out=await personalLiveVerifyJsonp(payload);if(personalLiveSnapshotMatches(out,payload))return out;lastErr=new Error('A Central respondeu, mas o placar ainda não corresponde ao treino atual.')}catch(e){lastErr=e}
+ }
+ throw lastErr||new Error('A Central não confirmou o Personal Live.');
 }
 function setPersonalLiveStatus(msg,ok=false){
  let el=$('personalLiveStatus'),badge=$('personalLiveBadge');if(el)el.textContent=msg||'';if(badge){badge.className='liveBadge'+(ok?' ready':'');badge.textContent=current?.personalLive?.status==='finished'?'✓ ENCERRADO':'● AO VIVO'}
@@ -353,7 +383,7 @@ async function syncPersonalLiveNow(force=false,statusOverride){
  if(personalLiveSyncing){personalLiveSyncQueued=true;return{ok:false,queued:true}}
  personalLiveSyncing=true;personalLiveSyncQueued=false;
  try{
-   let payload=personalLivePayload(statusOverride);let out=await personalLivePostIframe(payload);
+   let payload=personalLivePayload(statusOverride);let out=await personalLivePostVerified(payload);
    current.personalLive.lastOk=new Date().toISOString();current.personalLive.lastError='';current.personalLive.status=statusOverride||current.personalLive.status||'live';renderPersonalLivePanel();return{ok:true,out};
  }catch(e){
    current.personalLive.lastError=e?.message||String(e);setPersonalLiveStatus('Link criado, mas a atualização ao vivo está sem conexão: '+current.personalLive.lastError,false);return{ok:false,error:current.personalLive.lastError};
@@ -361,7 +391,7 @@ async function syncPersonalLiveNow(force=false,statusOverride){
    personalLiveSyncing=false;if(personalLiveSyncQueued&&current?.status==='running')schedulePersonalLiveSync(250);
  }
 }
-function schedulePersonalLiveSync(delay=650){
+function schedulePersonalLiveSync(delay=250){
  if(!current||current.mode!=='personal'||!current.personalLive||current.status!=='running')return;
  clearTimeout(personalLiveSyncTimer);personalLiveSyncTimer=setTimeout(()=>syncPersonalLiveNow(false),delay);
 }
@@ -372,12 +402,14 @@ async function initPersonalLiveSession(){
 }
 async function sharePersonalLive(){
  let link=personalLiveViewerUrl();if(!link)return alert('O link ainda não foi gerado.');
+ if(!current?.personalLive?.lastOk)return alert('A Central ainda não confirmou a sessão ao vivo. Aguarde aparecer “Link ativo e placar sincronizado com a Central” antes de enviar para a família.');
  let title=`Personal ao vivo${current?.theme?' · '+current.theme:''}`;
  try{if(navigator.share){await navigator.share({title,text:'Acompanhe o desafio do Personal ao vivo:',url:link});return}}catch(e){if(e?.name==='AbortError')return}
  try{await navigator.clipboard.writeText(link);alert('Link do Personal copiado. Agora é só enviar para a família.')}catch(e){prompt('Copie o link do Personal:',link)}
 }
 async function copyPersonalLive(){
  let link=personalLiveViewerUrl();if(!link)return alert('O link ainda não foi gerado.');
+ if(!current?.personalLive?.lastOk)return alert('A Central ainda não confirmou a sessão ao vivo. Aguarde aparecer “Link ativo e placar sincronizado com a Central” antes de copiar o link.');
  try{await navigator.clipboard.writeText(link);alert('Link copiado.')}catch(e){prompt('Copie o link:',link)}
 }
 
@@ -473,26 +505,39 @@ function setVoiceUI(state,msg){
 function addVoiceLog(text){
  voiceRecent.unshift(text);voiceRecent=voiceRecent.slice(0,4);let el=$("voiceLog");if(el)el.innerHTML=voiceRecent.map(x=>`<div>${esc(x)}</div>`).join("");let pe=$("pocketLast");if(pe)pe.textContent=text;
 }
+function normalizeVoiceCommandText(raw){
+ return norm(raw)
+   .replace(/[.,;:!?]+/g,' ')
+   .replace(/\btreis\b/g,'tres')
+   .replace(/\btrez\b/g,'tres')
+   .replace(/\bmais\s+(?=(?:1|um|3|tres)\b)/g,'')
+   .replace(/\s+/g,' ')
+   .trim();
+}
 function phoneticNameKey(x){return norm(x).replace(/ph/g,'f').replace(/th/g,'t').replace(/h/g,'').replace(/y/g,'i').replace(/w/g,'v').replace(/o$/,'u')}
 function nameKeyVariants(x){let a=[norm(x),phoneticNameKey(x)];return[...new Set(a.filter(Boolean))]}
 function voiceDictionary(){return present().map(a=>{let spoken=voiceName(a),keys=nameKeyVariants(spoken);return{athlete:a,spoken,keys}}).filter(x=>x.keys.length)}
 function findAthletesInVoiceSegment(segment){let base=norm(segment).replace(/[^a-z0-9ç ]/gi,' ').replace(/\s+/g,' ').trim(),forms=[base,phoneticNameKey(base)],dict=voiceDictionary(),hits=[];for(let d of dict){let bestPos=Infinity;for(let txt of forms){let padded=' '+txt+' ';for(let key of d.keys){let pos=padded.indexOf(' '+key+' ');if(pos>=0)bestPos=Math.min(bestPos,pos)}}if(bestPos<Infinity)hits.push({pos:bestPos,athlete:d.athlete,spoken:d.spoken,confidence:1})}return hits.sort((a,b)=>a.pos-b.pos)}
 function levenshtein(a,b){a=String(a||'');b=String(b||'');let m=Array.from({length:b.length+1},(_,i)=>[i]);for(let j=0;j<=a.length;j++)m[0][j]=j;for(let i=1;i<=b.length;i++)for(let j=1;j<=a.length;j++)m[i][j]=b[i-1]===a[j-1]?m[i-1][j-1]:Math.min(m[i-1][j-1],m[i][j-1],m[i-1][j])+1;return m[b.length][a.length]}
 function similarity(a,b){a=phoneticNameKey(a);b=phoneticNameKey(b);if(!a||!b)return 0;return 1-levenshtein(a,b)/Math.max(a.length,b.length)}
-function cleanHeardName(seg){return norm(seg).replace(/\b(?:ponto|pontos|para|pra|pro|ao|menos|resposta|errou|acertou|de|do|da|gol|gols|fez|marcou|fazer|marcar|feito|marcado|por)\b/g,' ').replace(/\b(?:1|2|3|um|dois|tres)\b/g,' ').replace(/\s+/g,' ').trim()}
+function cleanHeardName(seg){return normalizeVoiceCommandText(seg).replace(/\b(?:ponto|pontos|para|pra|pro|ao|menos|resposta|errou|acertou|certa|certo|correta|correto|respondeu|de|do|da|gol|gols|fez|marcou|fazer|marcar|feito|marcado|por)\b/g,' ').replace(/\b(?:1|2|3|um|dois|tres)\b/g,' ').replace(/\s+/g,' ').trim()}
 function voiceCandidateScores(seg){let heard=cleanHeardName(seg),tokens=heard.split(' ').filter(Boolean),phrases=[heard,...tokens];if(tokens.length>=2)for(let i=0;i<tokens.length-1;i++)phrases.push(tokens[i]+' '+tokens[i+1]);let arr=present(),scores=arr.map(a=>{let keys=[voiceName(a),firstName(a),display(a,arr)],best=0;for(let p of phrases)for(let k of keys)best=Math.max(best,similarity(p,k));return{athlete:a,score:best}}).sort((a,b)=>b.score-a.score);return{heard,scores}}
 function safeFuzzyAthlete(seg){let {scores}=voiceCandidateScores(seg);if(!scores.length)return null;let best=scores[0],second=scores[1]?.score||0,keyLen=phoneticNameKey(voiceName(best.athlete)).length,threshold=keyLen<=4?.64:.72;if(best.score>=threshold&&(best.score-second>=.18||best.score>=.9))return{pos:0,athlete:best.athlete,spoken:voiceName(best.athlete),confidence:best.score};return null}
 function resolveVoiceHits(seg){let exact=findAthletesInVoiceSegment(seg);if(exact.length)return exact;let fuzzy=safeFuzzyAthlete(seg);return fuzzy?[fuzzy]:[]}
 function queueVoicePending({kind='score',value=0,raw='',heardName='',source=null}){ensureTrainingFlow();let at=new Date().toISOString(),ctx=captureEventContext(null,at),p={id:'PEND-'+Date.now().toString(36).toUpperCase()+'-'+Math.floor(Math.random()*9999),kind,value,raw,heard_name:cleanHeardName(heardName||raw),source:source||automaticCtdSource(),at,elapsed_ms:ctx.elapsed_ms,stage:ctx.stage,stage_label:ctx.stage_label,activity_block:ctx.activity_block,group_snapshot:ctx.group_snapshot,resolved:false,discarded:false};current.voicePending.push(p);renderTrainingFlow();return p}
-function scoreValueFromCommand(cmd){cmd=norm(cmd);if(/menos\s+(?:1|um)|-\s*1/.test(cmd))return-1;if(/(?:3|tres)|ponto\s+de\s+(?:3|tres)/.test(cmd))return 3;return 1}
+function scoreValueFromCommand(cmd){cmd=normalizeVoiceCommandText(cmd);if(/menos\s+(?:1|um)|-\s*1/.test(cmd))return-1;if(/\b(?:3|tres)\b|ponto\s+de\s+(?:3|tres)|acertou\s+(?:a\s+)?resposta|resposta\s+(?:certa|correta)/.test(cmd))return 3;return 1}
 function goalCountWord(x){x=norm(x);if(x==='2'||x==='dois')return 2;if(x==='3'||x==='tres')return 3;return 1}
 function parseGoalVoice(t,raw,allowPending=true){let m=null,heard='',count=1;m=t.match(/\b(?:1|um|2|dois|3|tres)\s+ponto(?:s)?\s+(?:para|pra|pro|ao|a)\s+(.+?)\s+por\s+(?:fazer|marcar|ter\s+feito|ter\s+marcado)\s+(?:um\s+)?gol\b/);if(m){heard=m[1];count=1}else{m=t.match(/\b(?:(1|um|2|dois|3|tres)\s+)?gol(?:s)?\s+(?:para|pra|pro|ao|a|do|da)\s+(.+)/);if(m){count=goalCountWord(m[1]);heard=m[2]}else{m=t.match(/^(.+?)\s+(?:fez|marcou)\s+(?:(1|um|2|dois|3|tres)\s+)?gol(?:s)?\b/);if(m){heard=m[1];count=goalCountWord(m[2])}}}if(!m)return 0;let hits=resolveVoiceHits(heard);if(!hits.length){if(allowPending){queueVoicePending({kind:'goal',value:count,raw,heardName:heard});$("voiceLast").innerHTML=`<b>⚠️ ${count} gol${count>1?'s':''} pendente${count>1?'s':''}</b><div class=small>Ouvido: ${esc(raw)}</div>`;addVoiceLog(`⚠️ ${count} gol${count>1?'s':''} pendente${count>1?'s':''}`);renderTrainingFlow();return 1}return 0}let seen=new Set(),launched=0,names=[];for(let h of hits){if(seen.has(h.athlete.id))continue;seen.add(h.athlete.id);registerGoal(h.athlete.id,count,true,{raw});names.push(`${h.athlete.name} ⚽ ${count} gol${count>1?'s':''}`);launched++}$("voiceLast").innerHTML=`<b>✅ ${esc(names.join(' · '))}</b><div class=small>Gol separado do score · Ouvido: ${esc(raw)}</div>`;addVoiceLog('✅ '+names.join(' · '));voiceBeep(Math.max(1,launched));return launched}
-function parseVoiceCommand(raw,{allowPending=true}={}){if(!current||!raw)return 0;ensureTrainingFlow();let t=norm(raw);if(!t)return 0;if(/\bdesfazer( ultimo)?( ponto|registro)?\b/.test(t)){undo();$("voiceLast").innerHTML='<b>↩ Último registro desfeito</b>';addVoiceLog('↩ Último registro desfeito por voz');return 1}let handled=0,summary=[];if(/\bpergunta\s+(?:para|pra)\s+todos\b/.test(t)){let r=openCollectiveReflection(raw);if(r){summary.push('🧠 Pergunta para todos');handled++}t=t.replace(/\bpergunta\s+(?:para|pra)\s+todos\b/g,' ').trim()}let goalHandled=parseGoalVoice(t,raw,allowPending);if(goalHandled)return goalHandled;let errRe=/\berrou\s+(?:a\s+)?resposta\b/g,errs=[...t.matchAll(errRe)];for(let i=0;i<errs.length;i++){let m=errs[i],segStart=i?errs[i-1].index+errs[i-1][0].length:0,seg=t.slice(segStart,m.index),hits=resolveVoiceHits(seg),source=automaticCtdSource();if(!hits.length){if(allowPending){queueVoicePending({kind:'ctd_attempt',value:0,raw,heardName:seg,source});summary.push('⚠️ resposta pendente');handled++}continue}let h=hits[hits.length-1];registerCtdAttempt(h.athlete.id,false,source,raw,true);summary.push(`${h.athlete.name}: resposta não correta`);handled++}
+function parseVoiceCommand(raw,{allowPending=true}={}){if(!current||!raw)return 0;ensureTrainingFlow();let t=normalizeVoiceCommandText(raw);if(!t)return 0;if(/\bdesfazer( ultimo)?( ponto|registro)?\b/.test(t)){undo();$("voiceLast").innerHTML='<b>↩ Último registro desfeito</b>';addVoiceLog('↩ Último registro desfeito por voz');return 1}let handled=0,summary=[];if(/\bpergunta\s+(?:para|pra)\s+todos\b/.test(t)){let r=openCollectiveReflection(raw);if(r){summary.push('🧠 Pergunta para todos');handled++}t=t.replace(/\bpergunta\s+(?:para|pra)\s+todos\b/g,' ').trim()}let goalHandled=parseGoalVoice(t,raw,allowPending);if(goalHandled)return goalHandled;let errRe=/\berrou\s+(?:a\s+)?resposta\b/g,errs=[...t.matchAll(errRe)];for(let i=0;i<errs.length;i++){let m=errs[i],segStart=i?errs[i-1].index+errs[i-1][0].length:0,seg=t.slice(segStart,m.index),hits=resolveVoiceHits(seg),source=automaticCtdSource();if(!hits.length){if(allowPending){queueVoicePending({kind:'ctd_attempt',value:0,raw,heardName:seg,source});summary.push('⚠️ resposta pendente');handled++}continue}let h=hits[hits.length-1];registerCtdAttempt(h.athlete.id,false,source,raw,true);summary.push(`${h.athlete.name}: resposta não correta`);handled++}
+ let correctRe=/\b(?:acertou|respondeu\s+(?:certo|corretamente))\s+(?:a\s+)?resposta\b/g,corrects=[...t.matchAll(correctRe)];
+ for(let i=0;i<corrects.length;i++){let m=corrects[i],segStart=i?corrects[i-1].index+corrects[i-1][0].length:0,seg=t.slice(segStart,m.index),hits=resolveVoiceHits(seg),source=automaticCtdSource();if(!hits.length){if(allowPending){queueVoicePending({kind:'score',value:3,raw,heardName:seg,source});summary.push('⚠️ +3 pendente');handled++}continue}let h=hits[hits.length-1];point(h.athlete.id,'three',true,{raw,ctdSource:source});summary.push(`${h.athlete.name} +3 (CTD)`);handled++}
+ let rightRe=/\bresposta\s+(?:certa|correta)\s*(?:(?:para|pra|pro|ao|a)\s+)?(.+)/g,rights=[...t.matchAll(rightRe)];
+ for(let m of rights){let heard=m[1],hits=resolveVoiceHits(heard),source=automaticCtdSource();if(!hits.length){if(allowPending){queueVoicePending({kind:'score',value:3,raw,heardName:heard,source});summary.push('⚠️ +3 pendente');handled++}continue}let h=hits[0];point(h.athlete.id,'three',true,{raw,ctdSource:source});summary.push(`${h.athlete.name} +3 (CTD)`);handled++}
  let pointRe=/(?:\bmenos\s+(?:1|um)\b|\b-\s*1\b)\s*(?:ponto(?:s)?)?\s*(?:(?:para|pra|pro|ao|a)\s+)?|\bponto\s+de\s+(?:3|tres)\b\s*(?:(?:para|pra|pro|ao|a)\s+)?|\b(?:1|um|3|tres)\b\s+(?:(?:ponto(?:s)?)\s*(?:(?:para|pra|pro|ao|a)\s*)?|(?:para|pra|pro|ao|a)\s+)/g,ms=[...t.matchAll(pointRe)],launched=0;
- for(let i=0;i<ms.length;i++){let m=ms[i],start=m.index+m[0].length,nextPoint=i+1<ms.length?ms[i+1].index:t.length,nextErr=errs.find(e=>e.index>start)?.index??t.length,end=Math.min(nextPoint,nextErr),seg=t.slice(start,end),value=scoreValueFromCommand(m[0]),hits=resolveVoiceHits(seg),seen=new Set();if(!hits.length){if(allowPending){queueVoicePending({kind:'score',value,raw,heardName:seg,source:value===3?automaticCtdSource():null});summary.push(`⚠️ ${value>0?'+':''}${value} pendente`);handled++}continue}for(let h of hits){if(seen.has(h.athlete.id))continue;seen.add(h.athlete.id);let meta={raw};if(value===3)meta.ctdSource=automaticCtdSource();point(h.athlete.id,value===1?'one':value===3?'three':'minus',true,meta);summary.push(value===-1?`${h.athlete.name} −1 (conduta/compromisso)`:`${h.athlete.name} +${value}${value===1?' (CTP)':' (CTD)'}`);launched++;handled++}}
- if(!ms.length){let simple=t.match(/\b(menos\s+(?:1|um)|-\s*1|3|tres|1|um)\s+ponto(?:s)?\b/);if(simple){let value=scoreValueFromCommand(simple[0]),hits=resolveVoiceHits(t);if(hits.length===1){let meta={raw};if(value===3)meta.ctdSource=automaticCtdSource();point(hits[0].athlete.id,value===1?'one':value===3?'three':'minus',true,meta);summary.push(`${hits[0].athlete.name} ${value>0?'+':''}${value}`);launched++;handled++}else if(allowPending){queueVoicePending({kind:'score',value,raw,heardName:t,source:value===3?automaticCtdSource():null});summary.push(`⚠️ ${value>0?'+':''}${value} pendente`);handled++}}}
+ for(let i=0;i<ms.length;i++){let m=ms[i],start=m.index+m[0].length,nextPoint=i+1<ms.length?ms[i+1].index:t.length,nextErr=errs.find(e=>e.index>start)?.index??t.length,nextCorrect=corrects.find(e=>e.index>start)?.index??t.length,nextRight=rights.find(e=>e.index>start)?.index??t.length,end=Math.min(nextPoint,nextErr,nextCorrect,nextRight),seg=t.slice(start,end),value=scoreValueFromCommand(m[0]),hits=resolveVoiceHits(seg),seen=new Set();if(!hits.length){if(allowPending){queueVoicePending({kind:'score',value,raw,heardName:seg,source:value===3?automaticCtdSource():null});summary.push(`⚠️ ${value>0?'+':''}${value} pendente`);handled++}continue}for(let h of hits){if(seen.has(h.athlete.id))continue;seen.add(h.athlete.id);let meta={raw};if(value===3)meta.ctdSource=automaticCtdSource();point(h.athlete.id,value===1?'one':value===3?'three':'minus',true,meta);summary.push(value===-1?`${h.athlete.name} −1 (conduta/compromisso)`:`${h.athlete.name} +${value}${value===1?' (CTP)':' (CTD)'}`);launched++;handled++}}
+ if(!ms.length&&!corrects.length&&!rights.length){let simple=t.match(/\b(menos\s+(?:1|um)|-\s*1|3|tres|1|um)\s+ponto(?:s)?\b/);if(simple){let value=scoreValueFromCommand(simple[0]),hits=resolveVoiceHits(t);if(hits.length===1){let meta={raw};if(value===3)meta.ctdSource=automaticCtdSource();point(hits[0].athlete.id,value===1?'one':value===3?'three':'minus',true,meta);summary.push(`${hits[0].athlete.name} ${value>0?'+':''}${value}`);launched++;handled++}else if(allowPending){queueVoicePending({kind:'score',value,raw,heardName:t,source:value===3?automaticCtdSource():null});summary.push(`⚠️ ${value>0?'+':''}${value} pendente`);handled++}}}
  if(handled){$("voiceLast").innerHTML=`<b>${summary.some(x=>x.includes('⚠️'))?'⚠️':'✅'} ${esc(summary.join(' · '))}</b><div class=small>Ouvido: ${esc(raw)}</div>`;addVoiceLog((summary.some(x=>x.includes('⚠️'))?'⚠️ ':'✅ ')+summary.join(' · '));if(launched)voiceBeep(Math.max(1,launched));renderReflectionState();renderTrainingFlow()}else if(allowPending&&/ponto|resposta|pergunta|menos|gol/.test(t)){$("voiceLast").innerHTML=`<b>⚠️ Comando ouvido, mas não consegui interpretar a ação.</b><div class=small>${esc(raw)}</div>`;addVoiceLog('⚠️ Não interpretado: '+raw)}return handled}
-function processRecognitionAlternatives(alts){alts=(alts||[]).map(x=>String(x||'').trim()).filter(Boolean);if(!alts.length)return;let key=norm(alts[0]),now=Date.now();if(key===lastVoiceRaw&&now-lastVoiceAt<1200)return;lastVoiceRaw=key;lastVoiceAt=now;for(let raw of alts){let n=parseVoiceCommand(raw,{allowPending:false});if(n)return n}return parseVoiceCommand(alts[0],{allowPending:true})}
+function processRecognitionAlternatives(alts){alts=(alts||[]).map(x=>String(x||'').trim()).filter(Boolean);if(!alts.length)return;let key=normalizeVoiceCommandText(alts[0]),now=Date.now();if(key===lastVoiceRaw&&now-lastVoiceAt<1200)return;lastVoiceRaw=key;lastVoiceAt=now;let semantic=alts.find(x=>/acertou\s+(?:a\s+)?resposta|respondeu\s+(?:certo|corretamente)\s+(?:a\s+)?resposta|resposta\s+(?:certa|correta)/.test(normalizeVoiceCommandText(x)));if(semantic){let n=parseVoiceCommand(semantic,{allowPending:false});if(n)return n}for(let raw of alts){let n=parseVoiceCommand(raw,{allowPending:false});if(n)return n}return parseVoiceCommand(alts[0],{allowPending:true})}
 function pendingCandidates(p){return voiceCandidateScores(p.heard_name||p.raw).scores.slice(0,3)}
 function pendingContextText(p){let x=`${formatDuration(p.elapsed_ms)} · ${stageInfo(p.stage).label}`;if(p.stage==='atividade'&&p.activity_block)x+=` · Bloco ${p.activity_block}`;return x}
 function renderPendingReview(){let list=unresolvedVoicePending();$('pendingReviewCount').textContent=`${list.length} pendência(s)`;if(!list.length){$('pendingReviewBody').innerHTML='<div class=empty>Todas as pendências foram resolvidas.</div>';setTimeout(()=>{ $('pendingReviewModal').classList.remove('on');openFinishModal()},250);return}let p=list[0],cand=pendingCandidates(p),arr=present();$('pendingReviewBody').innerHTML=`<div class="pendingCard"><span class="stageTag">${esc(pendingContextText(p))}</span><div class="small" style="margin-top:8px">Ouvido</div><div class="pendingHeard">“${esc(p.raw)}”</div><div class="small">${p.kind==='score'?`Valor interpretado: <b>${p.value>0?'+':''}${p.value}</b>`:p.kind==='goal'?`Gol interpretado: <b>⚽ ${p.value||1}</b> (separado do score)`:'Tentativa de resposta sem acerto'} · Nome ouvido: <b>${esc(p.heard_name||'não isolado')}</b></div><div class="candidateGrid">${cand.map(c=>`<button data-resolve-pending="${p.id}" data-athlete="${c.athlete.id}">${esc(display(c.athlete,arr))}<br><span class=small>${Math.round(c.score*100)}% similar</span></button>`).join('')}</div><div class="pendingAll"><select id="pendingAllSelect"><option value="">Outro atleta presente…</option>${arr.map(a=>`<option value="${a.id}">${esc(a.name)}</option>`).join('')}</select><button class="smallBtn" id="pendingUseSelect" style="width:100%;margin-top:6px">Usar atleta selecionado</button><button class="smallBtn" data-discard-pending="${p.id}" style="width:100%;margin-top:6px">Descartar este comando</button></div></div>`;document.querySelectorAll('[data-resolve-pending]').forEach(b=>b.onclick=()=>resolvePending(b.dataset.resolvePending,b.dataset.athlete));document.querySelectorAll('[data-discard-pending]').forEach(b=>b.onclick=()=>discardPending(b.dataset.discardPending));$('pendingUseSelect').onclick=()=>{let aid=$('pendingAllSelect').value;if(!aid)return alert('Escolha um atleta.');resolvePending(p.id,aid)}}

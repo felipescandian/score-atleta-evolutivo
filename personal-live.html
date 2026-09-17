@@ -110,7 +110,7 @@ function updateClock(){
  $('timer').textContent='⏱ '+fmtTime(Math.max(0,end-start));
 }
 if(!SID||!KEY||!API){showError('Este link está incompleto. Peça ao professor para gerar um novo link pelo Score Atleta Evolutivo.');return}
-request();pollTimer=setInterval(request,5000);clockTimer=setInterval(updateClock,1000);
+request();pollTimer=setInterval(request,1500);clockTimer=setInterval(updateClock,1000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')request()});window.addEventListener('focus',request);
 })();
 </script>
 </body>
