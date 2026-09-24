@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Score Atleta Evolutivo V18.1 — feedback visual forte no Modo Antebraço</title>
+<title>Score Atleta Evolutivo V18.3 — amarelo obrigatório na escolha de atleta</title>
 <style>
 :root{--bg:#06111f;--card:#111f33;--card2:#172842;--line:rgba(255,255,255,.12);--txt:#f8fafc;--muted:#9fb0c8;--g:#18b66f;--b:#3b82f6;--p:#8b5cf6;--r:#ef4444;--y:#f59e0b}
 *{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top,#172554,#06111f 42%,#020617);color:var(--txt);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;max-width:850px;margin-inline:auto;padding:10px 10px 88px;user-select:none;-webkit-tap-highlight-color:transparent}
@@ -63,9 +63,10 @@ h1,h2,h3{margin:0}h1{font-size:19px}h2{font-size:18px}.small{color:var(--muted);
 .pocketHint{display:block;color:#cbd5e1;font-size:11px;line-height:1.35;margin-top:7px}
 #pocketOverlay{position:fixed;inset:0;z-index:10000;background:#000;display:none;align-items:center;justify-content:center;text-align:center;padding:18px;overscroll-behavior:none;user-select:none;-webkit-user-select:none;transition:none!important}
 #pocketOverlay.on{display:flex}
-/* V18.1: cores propositalmente muito fortes para leitura periférica no campo. */
+/* V18.3: feedback visual protegido contra rerenders durante o reconhecimento. */
 #pocketOverlay.armGreen{background:#00c853!important;color:#fff!important}
-#pocketOverlay.armYellow{background:#ffc400!important;color:#171006!important}
+#pocketOverlay.armYellow{background:#ffc400!important;background-color:#ffc400!important;color:#171006!important;box-shadow:inset 0 0 0 12px #ffd740!important}
+body.pocketLocked:has(#pocketOverlay.armYellow){background:#ffc400!important}
 #pocketOverlay.armNeutral{background:#000!important;color:#fff!important}
 #pocketOverlay.armGreen::before,#pocketOverlay.armYellow::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:0}
 #pocketOverlay.armGreen::before{box-shadow:inset 0 0 0 10px rgba(255,255,255,.24)}
@@ -77,8 +78,12 @@ body.pocketLocked{overflow:hidden;overscroll-behavior:none}
 .pocketBox{width:min(560px,100%);display:flex;flex-direction:column;align-items:center;gap:11px;color:#fff}
 #pocketOverlay.armYellow .pocketBox{color:#171006}
 .pocketIcon{width:80px;height:80px;border-radius:50%;border:1px solid rgba(245,190,70,.55);display:flex;align-items:center;justify-content:center;font-size:34px;background:radial-gradient(circle,rgba(245,158,11,.14),rgba(0,0,0,.2));box-shadow:0 0 36px rgba(245,158,11,.08)}
-#pocketOverlay.armGreen .pocketIcon{border-color:rgba(255,255,255,.72);background:rgba(255,255,255,.14)}
-#pocketOverlay.armYellow .pocketIcon{border-color:rgba(23,16,6,.25);background:rgba(255,255,255,.22);box-shadow:none}
+#pocketOverlay.armGreen .pocketIcon{border-color:rgba(255,255,255,.82);background:rgba(255,255,255,.18);box-shadow:0 0 44px rgba(255,255,255,.18)}
+#pocketOverlay.armGreen .pocketLast{background:rgba(255,255,255,.16);color:#fff;border-color:rgba(255,255,255,.34)}
+#pocketOverlay.armGreen .pocketTheme,#pocketOverlay.armGreen .pocketFoot{color:rgba(255,255,255,.88)}
+#pocketOverlay.armGreen #pocketUnlock,#pocketOverlay.armGreen .armControls{opacity:.16;pointer-events:none}
+#pocketOverlay.armYellow .pocketIcon{border-color:rgba(23,16,6,.30);background:#fff3bf;color:#171006;box-shadow:0 0 0 6px rgba(255,255,255,.18);font-weight:1000}
+#pocketOverlay.armYellow #pocketTitle{color:#171006!important;font-weight:1000;text-shadow:none!important}
 .pocketBox h2{font-size:25px}.pocketState{color:#bbf7d0;font-weight:1000;font-size:16px}.pocketTheme{color:#94a3b8;font-size:12px;line-height:1.35}.pocketLast{width:100%;min-height:54px;border:1px solid rgba(255,255,255,.10);border-radius:14px;padding:10px;background:rgba(5,5,5,.74);color:#dbeafe;font-size:12px;line-height:1.35}
 #pocketOverlay.armYellow .pocketState,#pocketOverlay.armYellow .pocketTheme{color:#171006}#pocketOverlay.armYellow .pocketLast{background:rgba(255,255,255,.78);color:#241804;border-color:rgba(23,16,6,.18)}
 .armChoices{width:100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.armChoices:empty{display:none}.armChoice{min-height:58px;border-radius:15px;border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.12);color:#fff;font-size:16px;font-weight:1000;padding:9px;touch-action:manipulation}.armChoice small{display:block;font-size:10px;opacity:.76;margin-top:3px}.armYellow .armChoice{background:rgba(255,255,255,.88);border-color:rgba(23,16,6,.18);color:#171006}.armChoice.secondary{font-size:13px;background:rgba(255,255,255,.07)}
@@ -166,7 +171,7 @@ body.pocketLocked{overflow:hidden;overscroll-behavior:none}
 </style>
 </head>
 <body>
-<header class="top"><div><h1>Score Atleta Evolutivo <span style="font-size:11px;color:#f59e0b;vertical-align:middle">V18.1</span></h1><div id="sub" class="small">CTP • CTD • conduta • acompanhamento por evidências</div></div><button class="btn" id="gear">⚙️</button></header>
+<header class="top"><div><h1>Score Atleta Evolutivo <span style="font-size:11px;color:#f59e0b;vertical-align:middle">V18.3</span></h1><div id="sub" class="small">CTP • CTD • conduta • acompanhamento por evidências</div></div><button class="btn" id="gear">⚙️</button></header>
 
 <section id="home" class="screen on">
 <div class="panel">
@@ -227,6 +232,7 @@ body.pocketLocked{overflow:hidden;overscroll-behavior:none}
  <div class="flex" style="margin-top:8px">
   <button id="micTest" class="smallBtn">🔐 Testar permissão do microfone</button>
   <button id="pocketToggle" class="smallBtn">⌚ Modo antebraço</button>
+  <button id="armColorTest" class="smallBtn">🧪 Testar verde/amarelo</button>
   <span id="micEnv" class="small"></span>
  </div>
  <span class="pocketHint">Modo antebraço: tela preta econômica durante a escuta. <b>Verde</b> = registro feito; <b>amarelo</b> = comando entendido, mas é preciso escolher o atleta; <b>vibração sem cor</b> = houve tentativa de comando, mas o app não registrou com segurança.</span>
@@ -291,11 +297,11 @@ body.pocketLocked{overflow:hidden;overscroll-behavior:none}
 
 <script>
 const KEY="score_atleta_evolutivo_v2_persistente";
-const APP_VERSION="18.1";
+const APP_VERSION="18.2";
 const $=id=>document.getElementById(id);
 let data=load(), current=null;
 let voiceRecognition=null, voiceActive=false, voiceStarting=false, voiceRestartTimer=null, wakeLock=null, voiceRecent=[], collectiveTimer=null, lastVoiceRaw="", lastVoiceAt=0;
-let pocketMode=false, pocketHoldTimer=null, groupDraft=null, trainingTimer=null, lastMicLabel="", pocketFeedbackCount=0, feedbackAudioCtx=null, armFeedbackTimer=null;
+let pocketMode=false, pocketHoldTimer=null, groupDraft=null, trainingTimer=null, lastMicLabel="", pocketFeedbackCount=0, feedbackAudioCtx=null, armFeedbackTimer=null, armVisualMode="idle";
 let personalLiveSyncTimer=null, personalLiveSyncing=false, personalLiveSyncQueued=false;
 function id(){return "ATL-"+Date.now().toString(36).toUpperCase()+"-"+Math.floor(Math.random()*9999)}
 function norm(s){return String(s||"").trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\s+/g," ")}
@@ -609,7 +615,7 @@ function processRecognitionAlternatives(alts){alts=(alts||[]).map(x=>String(x||'
 function pendingCandidates(p){return voiceCandidateScores(p.heard_name||p.raw).scores.slice(0,3)}
 function pendingContextText(p){let x=`${formatDuration(p.elapsed_ms)} · ${stageInfo(p.stage).label}`;if(p.stage==='atividade'&&p.activity_block)x+=` · Bloco ${p.activity_block}`;return x}
 function renderPendingReview(){let list=unresolvedVoicePending();$('pendingReviewCount').textContent=`${list.length} pendência(s)`;if(!list.length){$('pendingReviewBody').innerHTML='<div class=empty>Todas as pendências foram resolvidas.</div>';setTimeout(()=>{ $('pendingReviewModal').classList.remove('on');openFinishModal()},250);return}let p=list[0],cand=pendingCandidates(p),arr=present();$('pendingReviewBody').innerHTML=`<div class="pendingCard"><span class="stageTag">${esc(pendingContextText(p))}</span><div class="small" style="margin-top:8px">Ouvido</div><div class="pendingHeard">“${esc(p.raw)}”</div><div class="small">${p.kind==='score'?`Valor interpretado: <b>${p.value>0?'+':''}${p.value}</b>`:p.kind==='goal'?`Gol interpretado: <b>⚽ ${p.value||1}</b> (separado do score)`:'Tentativa de resposta sem acerto'} · Nome ouvido: <b>${esc(p.heard_name||'não isolado')}</b></div><div class="candidateGrid">${cand.map(c=>`<button data-resolve-pending="${p.id}" data-athlete="${c.athlete.id}">${esc(display(c.athlete,arr))}<br><span class=small>${Math.round(c.score*100)}% similar</span></button>`).join('')}</div><div class="pendingAll"><select id="pendingAllSelect"><option value="">Outro atleta presente…</option>${arr.map(a=>`<option value="${a.id}">${esc(a.name)}</option>`).join('')}</select><button class="smallBtn" id="pendingUseSelect" style="width:100%;margin-top:6px">Usar atleta selecionado</button><button class="smallBtn" data-discard-pending="${p.id}" style="width:100%;margin-top:6px">Descartar este comando</button></div></div>`;document.querySelectorAll('[data-resolve-pending]').forEach(b=>b.onclick=()=>resolvePending(b.dataset.resolvePending,b.dataset.athlete));document.querySelectorAll('[data-discard-pending]').forEach(b=>b.onclick=()=>discardPending(b.dataset.discardPending));$('pendingUseSelect').onclick=()=>{let aid=$('pendingAllSelect').value;if(!aid)return alert('Escolha um atleta.');resolvePending(p.id,aid)}}
-function resolvePending(pid,aid){let p=(current.voicePending||[]).find(x=>x.id===pid),a=findSessionAthlete(aid);if(!p||!a)return;let ctx={stage:p.stage,stage_label:stageInfo(p.stage).label,elapsed_ms:p.elapsed_ms,activity_block:p.activity_block||null,activity_context:p.stage==='atividade'?groupFromSnapshot(aid,p.group_snapshot):null,group_snapshot:p.group_snapshot||null};if(p.kind==='score')point(aid,p.value===1?'one':p.value===3?'three':'minus',true,{raw:p.raw,ctdSource:p.source,atOverride:p.at,contextOverride:ctx,groupSnapshot:p.group_snapshot,fromPending:true});else if(p.kind==='goal')registerGoal(aid,p.value||1,true,{raw:p.raw,atOverride:p.at,contextOverride:ctx,groupSnapshot:p.group_snapshot,fromPending:true});else{registerCtdAttempt(aid,false,p.source||'directed',p.raw,true,{atOverride:p.at,contextOverride:ctx,groupSnapshot:p.group_snapshot});if(pocketMode){try{if(navigator.vibrate)navigator.vibrate([90])}catch(e){}}}p.resolved=true;p.resolved_athlete_id=aid;p.resolved_at=new Date().toISOString();if($("pendingReviewModal")?.classList.contains('on'))renderPendingReview();else if(pocketMode)setTimeout(()=>renderArmIdle(),p.kind==='ctd_attempt'?250:950);renderTrainingFlow()}
+function resolvePending(pid,aid){let p=(current.voicePending||[]).find(x=>x.id===pid),a=findSessionAthlete(aid);if(!p||!a)return;let ctx={stage:p.stage,stage_label:stageInfo(p.stage).label,elapsed_ms:p.elapsed_ms,activity_block:p.activity_block||null,activity_context:p.stage==='atividade'?groupFromSnapshot(aid,p.group_snapshot):null,group_snapshot:p.group_snapshot||null};if(p.kind==='score')point(aid,p.value===1?'one':p.value===3?'three':'minus',true,{raw:p.raw,ctdSource:p.source,atOverride:p.at,contextOverride:ctx,groupSnapshot:p.group_snapshot,fromPending:true});else if(p.kind==='goal')registerGoal(aid,p.value||1,true,{raw:p.raw,atOverride:p.at,contextOverride:ctx,groupSnapshot:p.group_snapshot,fromPending:true});else{registerCtdAttempt(aid,false,p.source||'directed',p.raw,true,{atOverride:p.at,contextOverride:ctx,groupSnapshot:p.group_snapshot});if(pocketMode){try{if(navigator.vibrate)navigator.vibrate([90])}catch(e){}}}p.resolved=true;p.resolved_athlete_id=aid;p.resolved_at=new Date().toISOString();if($("pendingReviewModal")?.classList.contains('on'))renderPendingReview();else if(pocketMode&&p.kind==='ctd_attempt')setTimeout(()=>renderArmIdle(),300);renderTrainingFlow()}
 function discardPending(pid){let p=(current.voicePending||[]).find(x=>x.id===pid);if(!p)return;p.discarded=true;p.discarded_at=new Date().toISOString();if($("pendingReviewModal")?.classList.contains('on'))renderPendingReview();else if(pocketMode)renderArmIdle();renderTrainingFlow()}
 function ensureFeedbackAudio(){
  try{
@@ -636,11 +642,11 @@ function voiceBeep(count=1){
  if(pocketMode)return;
  playFeedbackTones(count>1?[{f:860,d:.13,g:.09},{f:1040,d:.13,g:.09}]:[{f:780,d:.15,g:.08}]);
 }
-function armPendingCandidates(p){let cand=pendingCandidates(p),usable=cand.filter(c=>c.score>=.48).slice(0,3),strong=cand.filter(c=>c.score>=.78).slice(0,3),ambiguous=strong.length>=2&&Math.abs(strong[0].score-strong[1].score)<=.16;return{cand,usable,strong,ambiguous}}
+function armPendingCandidates(p){let cand=pendingCandidates(p),usable=cand.filter(c=>c.score>=.48).slice(0,3),strong=cand.filter(c=>c.score>=.78).slice(0,3);/* V18.3: se o app oferece 2+ atletas para escolha, o estado visual é obrigatoriamente amarelo. Não depende mais da diferença de similaridade. */let needsChoice=usable.length>=2;return{cand,usable,strong,ambiguous:needsChoice,needsChoice}}
 function armActionLabel(p){if(p.kind==='goal')return`⚽ ${p.value||1} gol${(p.value||1)>1?'s':''}`;if(p.kind==='ctd_attempt')return'Resposta sem acerto';return`${p.value>0?'+':''}${p.value}${p.value===1?' CTP':p.value===3?' CTD':p.value===-1?' conduta':''}`}
 function clearArmFeedbackTimer(){clearTimeout(armFeedbackTimer);armFeedbackTimer=null}
 function armSetVisual(kind='idle'){
- let o=$('pocketOverlay');if(!o)return;
+ let o=$('pocketOverlay');if(!o)return;armVisualMode=kind;
  o.classList.remove('armGreen','armYellow','armNeutral','armFlash');
  // Além das classes, usa cor inline como redundância. Alguns WebViews/launchers
  // mantêm estilos antigos em cache; o inline garante a troca imediatamente.
@@ -662,14 +668,14 @@ function armSetVisual(kind='idle'){
  if(kind==='green'||kind==='yellow'){o.classList.add('armFlash')}
 }
 function renderArmPending(p){
- if(!pocketMode||!p)return;clearArmFeedbackTimer();let {usable,ambiguous}=armPendingCandidates(p),arr=present();armSetVisual(ambiguous?'yellow':'neutral');
+ if(!pocketMode||!p)return;clearArmFeedbackTimer();let {usable,needsChoice}=armPendingCandidates(p),arr=present();/* A própria existência de múltiplas opções exibidas define o amarelo. */armSetVisual(needsChoice?'yellow':'neutral');
  let state=$('pocketState'),title=$('pocketTitle'),last=$('pocketLast'),choices=$('armChoices');
- if(title)title.textContent=ambiguous?'Escolha o atleta':'Comando não registrado';
- if(state)state.textContent=ambiguous?'⚠️ Entendi a ação, mas o nome é ambíguo':'📳 Ouvi uma tentativa de comando';
+ if(title)title.textContent=needsChoice?'ESCOLHA O ATLETA':'Comando não registrado';
+ if(state)state.textContent=needsChoice?'⚠️ COMANDO ENTENDIDO · escolha quem recebe':'📳 Ouvi uma tentativa de comando';
  if(last)last.innerHTML=`<b>${esc(armActionLabel(p))}</b><br>Ouvido: ${esc(p.raw||'—')}${p.heard_name?`<br><span style="opacity:.78">Nome provável: ${esc(p.heard_name)}</span>`:''}`;
  if(choices){choices.innerHTML=usable.map(c=>`<button class="armChoice" data-arm-resolve="${esc(p.id)}" data-athlete="${esc(c.athlete.id)}">${esc(display(c.athlete,arr))}<small>${Math.round(c.score*100)}% de compatibilidade</small></button>`).join('');document.querySelectorAll('[data-arm-resolve]').forEach(b=>b.onclick=()=>resolvePending(b.dataset.armResolve,b.dataset.athlete))}
  let discard=$('armDiscardPending');if(discard){discard.disabled=false;discard.dataset.pendingId=p.id;discard.style.opacity='1'}
- try{if(navigator.vibrate){navigator.vibrate(0);navigator.vibrate(ambiguous?[90,70,90]:[220])}}catch(e){}
+ try{if(navigator.vibrate){navigator.vibrate(0);navigator.vibrate(needsChoice?[90,70,90]:[220])}}catch(e){}
 }
 function armPendingFeedback(p){if(!pocketMode||!p||p.resolved||p.discarded)return;renderArmPending(p)}
 function renderArmIdle(){
@@ -686,7 +692,26 @@ function pocketActionFeedback(aid,type,count=1){
  if(ic){ic.textContent='✓';ic.classList.remove('confirm');void ic.offsetWidth;ic.classList.add('confirm')}
  try{if(navigator.vibrate){navigator.vibrate(0);navigator.vibrate([120])}}catch(e){}
  // Mantém o verde tempo suficiente para ser percebido mesmo com o braço em movimento.
- armFeedbackTimer=setTimeout(()=>{if(ic)ic.textContent='🎙️';renderArmIdle()},1350);
+ armFeedbackTimer=setTimeout(()=>{if(ic)ic.textContent='🎙️';renderArmIdle()},1500);
+}
+function testArmColors(){
+ let o=$('pocketOverlay');if(!o)return;
+ let wasPocket=pocketMode;
+ clearArmFeedbackTimer();
+ if(!wasPocket){o.classList.add('on');o.setAttribute('aria-hidden','false');document.body.classList.add('pocketLocked')}
+ let title=$('pocketTitle'),st=$('pocketState'),ic=document.querySelector('.pocketIcon'),last=$('pocketLast'),choices=$('armChoices');
+ if(choices)choices.innerHTML='';
+ armSetVisual('green');if(title)title.textContent='TESTE VERDE';if(st)st.textContent='✓ Registro confirmado';if(ic)ic.textContent='✓';if(last)last.textContent='A tela deve ficar predominantemente VERDE.';
+ try{if(navigator.vibrate)navigator.vibrate([120])}catch(e){}
+ armFeedbackTimer=setTimeout(()=>{
+   armSetVisual('yellow');if(title)title.textContent='TESTE AMARELO';if(st)st.textContent='⚠️ Precisa escolher o atleta';if(ic)ic.textContent='?';if(last)last.textContent='A tela deve ficar predominantemente AMARELA.';
+   try{if(navigator.vibrate)navigator.vibrate([90,70,90])}catch(e){}
+   armFeedbackTimer=setTimeout(()=>{
+     if(ic)ic.textContent='🎙️';
+     if(wasPocket)renderArmIdle();
+     else{o.classList.remove('on');o.setAttribute('aria-hidden','true');document.body.classList.remove('pocketLocked');armSetVisual('idle')}
+   },1500);
+ },1500);
 }
 async function requestWakeLock(){
  try{
@@ -880,7 +905,7 @@ const MONTHS_PT=['JANEIRO','FEVEREIRO','MARÇO','ABRIL','MAIO','JUNHO','JULHO','
 function weekOfMonth(iso){let d=iso?new Date(iso+'T12:00:00'):new Date();return Math.max(1,Math.ceil(d.getDate()/7))}
 function formatDateBR(iso){if(!iso)return'';let p=iso.split('-');return p.length===3?`${p[2]}/${p[1]}/${p[0]}`:iso}
 function renderPremiumCover(){if(!current)return;let d=new Date((current.date||today())+'T12:00:00'),wk=weekOfMonth(current.date),obj=current.obs||current.theme||'Objetivo não informado';if($("coverWeek"))$("coverWeek").textContent=`SEMANA ${wk} DE ${MONTHS_PT[d.getMonth()]}`;if($("coverTrain"))$("coverTrain").textContent=`TREINO ${current.trainingNo||1}`;if($("coverObjective"))$("coverObjective").textContent=obj;if($("coverDate"))$("coverDate").textContent=formatDateBR(current.date)}
-function setPocketUI(){let b=$("pocketToggle"),o=$("pocketOverlay");if(b){b.classList.toggle('active',pocketMode);b.textContent=pocketMode?'⌚ Antebraço ativo':'⌚ Modo antebraço'}if(o){o.classList.toggle('on',pocketMode);o.setAttribute('aria-hidden',pocketMode?'false':'true')}document.body.classList.toggle('pocketLocked',pocketMode);if($("pocketTheme")&&current){let st=stageInfo(current.stage);$("pocketTheme").textContent=`${current.className} • ${current.theme} • ${st.n||''} ${st.label||''}`};if(pocketMode)renderArmIdle();else{clearArmFeedbackTimer();armSetVisual('idle')}}
+function setPocketUI(){let b=$("pocketToggle"),o=$("pocketOverlay");if(b){b.classList.toggle('active',pocketMode);b.textContent=pocketMode?'⌚ Antebraço ativo':'⌚ Modo antebraço'}if(o){o.classList.toggle('on',pocketMode);o.setAttribute('aria-hidden',pocketMode?'false':'true')}document.body.classList.toggle('pocketLocked',pocketMode);if($("pocketTheme")&&current){let st=stageInfo(current.stage);$("pocketTheme").textContent=`${current.className} • ${current.theme} • ${st.n||''} ${st.label||''}`};if(pocketMode){/* Preserva o verde até o timer terminar; rerenders do score não podem apagar a confirmação. */if(armVisualMode!=='green')renderArmIdle()}else{clearArmFeedbackTimer();armSetVisual('idle')}}
 async function enablePocketMode(){if(!current)return alert('Inicie um treino primeiro.');if(!voiceActive){await startVoice();if(!voiceActive)return}pocketMode=true;pocketFeedbackCount=0;let kept=await requestWakeLock();setPocketUI();try{if(navigator.vibrate)navigator.vibrate([80,50,80])}catch(e){}if(!kept&&!("wakeLock" in navigator))alert('Modo Antebraço ativado. Este navegador não oferece Wake Lock, então não consigo garantir que a tela permanecerá acesa durante todo o treino.')}
 function disablePocketMode(){pocketMode=false;clearArmFeedbackTimer();clearTimeout(pocketHoldTimer);pocketHoldTimer=null;let b=$("pocketUnlock");if(b)b.classList.remove('holding');setPocketUI();if(voiceActive)requestWakeLock()}
 async function togglePocketMode(){if(pocketMode)disablePocketMode();else await enablePocketMode()}
@@ -975,7 +1000,7 @@ $("allPresent").onclick=()=>{if(!current)return;sessionRoster().forEach(a=>curre
 $("quickAdd").onclick=()=>{if(!current)return;let n=prompt(current.mode==='personal'?"Nome do atleta/cliente para este treino:":"Nome completo do atleta temporário para esta chamada:");if(!n||!n.trim())return;let a=addTemporaryAthlete(n,{present:true,role:'atleta'});renderCall();if(a&&current.mode!=='personal')alert("Atleta incluído somente neste treino. Para entrar no histórico oficial mensal da escolinha, cadastre-o também na Central Evolutivo para receber um ID EVE-XXX.")};
 $("addClass").onclick=()=>{let n=$("newClass").value.trim();if(!n)return alert("Digite a turma.");if(data.classes.some(c=>norm(c)==norm(n)))return alert("Turma já existe.");data.classes.push(n);$("newClass").value="";save()};
 $("addNames").onclick=()=>{addNames($("addClassSel").value,$("names").value);$("names").value=""};$("filterClass").onchange=renderManage;
-$("saveEdit").onclick=()=>{let a=data.athletes.find(x=>x.id==$("editId").value);if(!a)return closeEdit();let n=$("editName").value.trim(),c=$("editClass").value,va=$("editVoiceAlias").value.trim();if(!n)return alert("Digite o nome.");a.name=n;a.className=c;a.voiceAlias=va;save();closeEdit()};$("cancelEdit").onclick=closeEdit;$("modal").onclick=e=>{if(e.target.id=="modal")closeEdit()};$("closeConcept").onclick=closeConcept;$("conceptModal").onclick=e=>{if(e.target.id=="conceptModal")closeConcept()};$("pocketUnlock").addEventListener("pointerdown",beginPocketUnlock);["pointerup","pointercancel","pointerleave"].forEach(ev=>$("pocketUnlock").addEventListener(ev,cancelPocketUnlock));$("pocketOverlay").addEventListener("contextmenu",e=>e.preventDefault());$("armListenNow").onclick=()=>{if(!voiceActive){startVoice();return}try{voiceRecognition?.abort()}catch(e){}setVoiceUI('restarting','Reativando escuta');setTimeout(()=>startRecognitionSession(),180);if(pocketMode){try{if(navigator.vibrate)navigator.vibrate([45])}catch(e){}}};$("armDiscardPending").onclick=()=>{let pid=$("armDiscardPending").dataset.pendingId;if(pid)discardPending(pid)};bindConceptLinks();
+$("saveEdit").onclick=()=>{let a=data.athletes.find(x=>x.id==$("editId").value);if(!a)return closeEdit();let n=$("editName").value.trim(),c=$("editClass").value,va=$("editVoiceAlias").value.trim();if(!n)return alert("Digite o nome.");a.name=n;a.className=c;a.voiceAlias=va;save();closeEdit()};$("cancelEdit").onclick=closeEdit;$("modal").onclick=e=>{if(e.target.id=="modal")closeEdit()};$("closeConcept").onclick=closeConcept;$("conceptModal").onclick=e=>{if(e.target.id=="conceptModal")closeConcept()};$("pocketUnlock").addEventListener("pointerdown",beginPocketUnlock);["pointerup","pointercancel","pointerleave"].forEach(ev=>$("pocketUnlock").addEventListener(ev,cancelPocketUnlock));$("pocketOverlay").addEventListener("contextmenu",e=>e.preventDefault());$("armColorTest").onclick=testArmColors;$("armListenNow").onclick=()=>{if(!voiceActive){startVoice();return}try{voiceRecognition?.abort()}catch(e){}setVoiceUI('restarting','Reativando escuta');setTimeout(()=>startRecognitionSession(),180);if(pocketMode){try{if(navigator.vibrate)navigator.vibrate([45])}catch(e){}}};$("armDiscardPending").onclick=()=>{let pid=$("armDiscardPending").dataset.pendingId;if(pid)discardPending(pid)};bindConceptLinks();
 $("stageLudica").onclick=()=>{};
 $("stageExplanation").onclick=()=>setTrainingStage('explicacao');
 $("stageActivity").onclick=()=>openGroupSetup(false);
