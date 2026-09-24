@@ -18,7 +18,7 @@
 #printSheet{display:none}
 @media(max-width:580px){.shell{width:min(100% - 12px,900px);padding-top:6px}.top{top:4px;padding:11px}.board{grid-template-columns:1fr 1fr}.hero{padding:14px}.breakdown{grid-template-columns:1fr 1fr}.player{min-height:104px;padding:11px}.score{font-size:29px}}
 @media(max-width:360px){.board{grid-template-columns:1fr}.top{align-items:flex-start}.status{font-size:8px}}
-/* ===== V18.7: PDF premium Evolutivo Performance ===== */
+/* ===== V18.9: PDF premium cinematográfico em 2 páginas ===== */
 @media print{
  @page{size:A4;margin:0}
  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
@@ -73,6 +73,54 @@
  .pdfFooter{margin-top:auto;padding-top:2.2mm;border-top:.24mm solid rgba(232,186,73,.56);display:flex;justify-content:space-between;align-items:center;font-size:6.2pt;color:#c6b38c;letter-spacing:.12em;text-transform:none}
  .pdfFooter b{color:#e7bf62}
 }
+
+/* ===== V18.9: PDF em 2 páginas — resultado + metodologia ===== */
+@media print{
+ html,body{height:auto!important;min-height:0!important;overflow:visible!important;background:#020202!important}
+ #printSheet{display:block!important;width:210mm!important;height:auto!important;min-height:0!important;overflow:visible!important;background:#020202!important}
+ .pdfPage{break-after:page!important;page-break-after:always!important;break-inside:avoid!important;page-break-inside:avoid!important}
+ .pdfPage:last-child{break-after:auto!important;page-break-after:auto!important}
+ .pdfPageNo{position:absolute;right:3.4mm;top:2.8mm;z-index:5;padding:1.2mm 2.1mm;border:.22mm solid rgba(229,183,73,.55);border-radius:999px;background:rgba(7,7,7,.65);color:#d8b35e;font-size:6pt;font-weight:900;letter-spacing:.10em}
+ .pdfPageResult .pdfHeader{margin-bottom:3.8mm}
+ .pdfPageResult .pdfHero{margin-top:3mm}
+ .pdfPageResult .pdfAthlete{padding:4.2mm 5mm}
+ .pdfPageResult .pdfAthleteName{font-size:28pt}
+ .pdfPageResult .pdfMeta{font-size:9pt;margin-top:2.7mm}
+ .pdfPageResult .pdfStats{margin-top:5mm;gap:4mm}
+ .pdfPageResult .pdfStat{min-height:23mm}
+ .pdfPageResult .pdfStatIcon{width:14mm;height:14mm;font-size:18pt}
+ .pdfPageResult .pdfStat b{font-size:30pt}
+ .pdfPageResult .pdfStat span{font-size:8pt}
+ .pdfPageResult .pdfPillars{margin-top:5mm;gap:3mm}
+ .pdfPageResult .pdfPillar{padding:2.2mm 2.8mm 2.5mm;border-radius:4mm}
+ .pdfPageResult .pdfPillarHead{font-size:10pt;margin-bottom:1.6mm}
+ .pdfPageResult .pdfPillarHead .note{font-size:14pt}
+ .pdfPageResult .pdfPillarIcon{width:8.5mm;height:8.5mm;font-size:11pt}
+ .pdfPageResult .pdfTrack{height:9mm;border-radius:3.3mm}
+ .pdfPageResult .pdfFill{border-radius:3.1mm;font-size:9pt;padding-right:3mm}
+ .pdfPageLead{margin-top:5mm;border:.26mm solid rgba(232,186,73,.55);border-radius:4mm;padding:3.5mm 4mm;background:linear-gradient(90deg,rgba(232,186,73,.10),rgba(0,0,0,.15));color:#e8dfcf;font-size:8.5pt;line-height:1.48}
+ .pdfPageLead b{color:#f2cd70;text-transform:uppercase;letter-spacing:.09em}
+
+ .pdfPageMethod .pdfHeader{margin-bottom:4mm}
+ .pdfMethodTitle{margin-top:3mm;text-align:left}
+ .pdfMethodKicker{color:#d9af52;font-size:7.2pt;font-weight:900;letter-spacing:.24em;text-transform:uppercase}
+ .pdfMethodTitle h1{margin:1.4mm 0 0;color:#fff;font-size:24pt;line-height:1.05;letter-spacing:.01em}
+ .pdfMethodSub{margin-top:2mm;color:#cfc5b3;font-size:9pt;line-height:1.5;max-width:165mm}
+ .pdfPageMethod .pdfTableWrap{margin-top:6mm;border-radius:4.5mm}
+ .pdfPageMethod .pdfSectionTitle{font-size:10pt;padding:3.2mm 3.6mm;letter-spacing:.22em}
+ .pdfPageMethod .pdfInterpret{font-size:9.4pt;line-height:1.52}
+ .pdfPageMethod .pdfInterpret th{font-size:7.3pt;padding:2.8mm 3mm}
+ .pdfPageMethod .pdfInterpret th:first-child{width:28%}
+ .pdfPageMethod .pdfInterpret td{padding:3.6mm 3.1mm;vertical-align:middle}
+ .pdfPageMethod .pdfInterpret td:first-child{font-size:9.6pt;padding-left:3.8mm}
+ .pdfPageMethod .pdfInterpret tr{height:29mm}
+ .pdfPageMethod .pdfNote{margin-top:5mm;padding:4mm 4.4mm;gap:4mm}
+ .pdfPageMethod .pdfNoteBadge{width:11mm;height:11mm;font-size:16pt}
+ .pdfPageMethod .pdfNote b{font-size:9pt}
+ .pdfPageMethod .pdfNoteText{font-size:8.7pt;line-height:1.55}
+ .pdfPageMethod .pdfFooter{font-size:7pt;padding-top:3mm}
+}
+
 </style>
 </head>
 <body>
@@ -119,7 +167,36 @@ function renderDetail(){const box=$('detail');if(!state||!selectedId){box.classL
  box.innerHTML=`<div class="detailHead"><div><div class="kicker">Como esse placar foi construído</div><h2>${esc(p.display||p.nome)} · ${n(p.total)} pts</h2></div><button type="button" class="close" id="closeDetail">Fechar</button></div><div class="breakdown">${p.role==='professor'?`<div class="bcard"><b>${n(p.one)}</b><span>Pontos +1</span></div><div class="bcard"><b>${n(p.total)}</b><span>Placar</span></div>`:`<div class="bcard"><b>${n(p.one)}</b><span>Ações corretas +1</span></div><div class="bcard"><b>${n(p.three)}</b><span>Perguntas certas +3</span></div><div class="bcard"><b>${n(p.minus)}</b><span>Descontos −1</span></div><div class="bcard"><b>${n(p.gols)}</b><span>Gols separados</span></div>`}</div><div class="eventHead">Registros desta sessão</div><div class="events">${events.length?events.map(e=>{const lab=eventLabel(e,p);return`<div class="event"><div class="evIcon">${lab.icon}</div><div class="evText">${esc(lab.text)}<small>${fmtClock(e.at)}${e.from_voice?' · por voz':''}</small></div><div class="evPts">${esc(lab.pts)}</div></div>`}).join(''):'<div class="empty">Ainda não há registros para este participante.</div>'}</div>`;$('closeDetail').onclick=()=>{selectedId='';render()}}
 function pdfPillars(ev){const icons={execucao:'⚽',comportamento:'👥',intensidade:'⚡',concentracao:'◉',entendimento:'🧠'};return PILLARS.map(x=>{let item=ev?.pilares?.[x.key]||{},nota=Math.max(0,Math.min(10,n(item.nota))),pts=Math.max(0,Math.round(n(item.pontos)));return `<div class="pdfPillar" style="--pc:${x.color}"><div class="pdfPillarHead"><div class="left"><span class="pdfPillarIcon">${icons[x.key]||'•'}</span><span class="name">${x.label}</span></div><span class="note">${nota}/10</span></div><div class="pdfTrack"><div class="pdfFill" style="width:${nota*10}%;--pc:${x.color}"><span>${pts} pts</span></div></div></div>`}).join('')}
 function pdfInterpretationTable(){return `<div class="pdfSectionTitle">Como interpretar os pilares</div><table class="pdfInterpret"><thead><tr><th>Pilar</th><th>O que observamos no treino</th></tr></thead><tbody>${PILLARS.map(x=>{let info=PDF_PILLAR_INFO[x.key]||{title:x.label,desc:''};return `<tr style="--pc:${x.color}"><td>${info.title}</td><td>${info.desc}</td></tr>`}).join('')}</tbody></table>`}
-function downloadAthletePdf(aid){const p=(state?.participantes||[]).find(x=>x.id===aid),ev=athleteEval(p);if(!p||!ev)return;const date=fmtDate(state.started_at),athlete=esc(p.display||p.nome),theme=esc(state.tema||'Personal'),coach=esc(state.treinador||'—'),avg=Number(ev.media).toFixed(1).replace('.',',');$('printSheet').innerHTML=`<section class="pdfPage"><img class="pdfPageBg" src="${PDF_BG_DATA}" alt=""><div class="pdfContent"><div class="pdfWatermark">EVP</div><div class="pdfHeader"><img class="pdfLogo" src="${PDF_LOGO_DATA}" alt="EVP"><div class="pdfBrand">Evolutivo Performance <span>•</span> Evolutivo Score</div></div><section class="pdfHero"><section class="pdfAthlete"><div class="pdfAthleteName">${athlete}</div><div class="pdfMeta"><b>Treino:</b> ${theme} &nbsp;•&nbsp; <b>Data:</b> ${date} &nbsp;•&nbsp; <b>Treinador:</b> ${coach}</div></section></section><div class="pdfStats"><div class="pdfStat"><div class="pdfStatIcon">🏆</div><div class="pdfStatText"><b>${n(p.total)}</b><span>Pontos no treino</span></div></div><div class="pdfStat"><div class="pdfStatIcon">▮</div><div class="pdfStatText"><b>${avg}/10</b><span>Média dos pilares</span></div></div></div><div class="pdfPillars">${pdfPillars(ev)}</div><div class="pdfTableWrap">${pdfInterpretationTable()}</div><div class="pdfNote"><div class="pdfNoteBadge">!</div><div class="pdfNoteText"><b>Importante</b>As notas representam uma observação deste treino específico. O objetivo não é classificar o atleta nem compará-lo com outras crianças, mas registrar evidências do processo para tornar mais claro o que foi observado e quais aspectos podem continuar sendo desenvolvidos.</div></div><footer class="pdfFooter"><span><b>Evolutivo Performance</b> · Formação esportiva infantil</span><span>${date}</span></footer></div></section>`;document.title=`Evolutivo_Performance_${String(p.display||p.nome).replace(/[^A-Za-z0-9À-ÿ]+/g,'_')}_${date.replace(/\//g,'-')}`;setTimeout(()=>window.print(),180)}
+function downloadAthletePdf(aid){
+ const p=(state?.participantes||[]).find(x=>x.id===aid),ev=athleteEval(p);if(!p||!ev)return;
+ const date=fmtDate(state.started_at),athlete=esc(p.display||p.nome),theme=esc(state.tema||'Personal'),coach=esc(state.treinador||'—'),avg=Number(ev.media).toFixed(1).replace('.',',');
+ const commonHeader=`<div class="pdfHeader"><img class="pdfLogo" src="${PDF_LOGO_DATA}" alt="EVP"><div class="pdfBrand">Evolutivo Performance <span>•</span> Evolutivo Score</div></div>`;
+ const footer=`<footer class="pdfFooter"><span><b>Evolutivo Performance</b> · Formação esportiva infantil</span><span>${date}</span></footer>`;
+ $('printSheet').innerHTML=`
+ <section class="pdfPage pdfPageResult">
+   <img class="pdfPageBg" src="${PDF_BG_DATA}" alt="">
+   <div class="pdfContent">
+     <div class="pdfPageNo">1 / 2</div><div class="pdfWatermark">EVP</div>${commonHeader}
+     <section class="pdfHero"><section class="pdfAthlete"><div class="pdfAthleteName">${athlete}</div><div class="pdfMeta"><b>Treino:</b> ${theme} &nbsp;•&nbsp; <b>Data:</b> ${date} &nbsp;•&nbsp; <b>Treinador:</b> ${coach}</div></section></section>
+     <div class="pdfStats"><div class="pdfStat"><div class="pdfStatIcon">🏆</div><div class="pdfStatText"><b>${n(p.total)}</b><span>Pontos no treino</span></div></div><div class="pdfStat"><div class="pdfStatIcon">▮</div><div class="pdfStatText"><b>${avg}/10</b><span>Média dos pilares</span></div></div></div>
+     <div class="pdfPillars">${pdfPillars(ev)}</div>
+     <div class="pdfPageLead"><b>Leitura do resultado</b><br>As barras mostram a nota atribuída pelo treinador em cada pilar e, dentro delas, quantos pontos da sessão foram associados proporcionalmente àquela avaliação. A página seguinte explica o que cada pilar representa dentro da metodologia Evolutivo Performance.</div>
+     ${footer}
+   </div>
+ </section>
+ <section class="pdfPage pdfPageMethod">
+   <img class="pdfPageBg" src="${PDF_BG_DATA}" alt="">
+   <div class="pdfContent">
+     <div class="pdfPageNo">2 / 2</div><div class="pdfWatermark">EVP</div>${commonHeader}
+     <div class="pdfMethodTitle"><div class="pdfMethodKicker">Metodologia de acompanhamento</div><h1>Como interpretar os pilares</h1><div class="pdfMethodSub">Os cinco pilares organizam aquilo que o treinador observa durante a sessão. Eles ajudam a transformar comportamentos, decisões e respostas do atleta em um feedback claro para a família, sem reduzir o processo a um simples placar.</div></div>
+     <div class="pdfTableWrap">${pdfInterpretationTable()}</div>
+     <div class="pdfNote"><div class="pdfNoteBadge">!</div><div class="pdfNoteText"><b>Importante</b>As notas representam uma observação deste treino específico. O objetivo não é classificar o atleta nem compará-lo com outras crianças, mas registrar evidências do processo para tornar mais claro o que foi observado e quais aspectos podem continuar sendo desenvolvidos.</div></div>
+     ${footer}
+   </div>
+ </section>`;
+ document.title=`Evolutivo_Performance_${String(p.display||p.nome).replace(/[^A-Za-z0-9À-ÿ]+/g,'_')}_${date.replace(/\//g,'-')}`;
+ setTimeout(()=>window.print(),220)
+}
 window.addEventListener('afterprint',()=>{document.title=oldTitle;$('printSheet').innerHTML=''})
 function updateClock(){if(!state)return;const start=state.started_at?new Date(state.started_at).getTime():Date.now(),end=state.status==='live'?Date.now():(state.ended_at?new Date(state.ended_at).getTime():Date.now());$('timer').textContent='⏱ '+fmtTime(Math.max(0,end-start))}
 if(!SID||!KEY||!API){showError('Este link está incompleto. Peça ao professor para gerar um novo link pelo Evolutivo Score.');return}request();pollTimer=setInterval(request,5000);clockTimer=setInterval(updateClock,1000);
