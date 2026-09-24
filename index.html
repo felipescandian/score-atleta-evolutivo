@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Score Atleta Evolutivo V18.0 — Modo Antebraço inteligente</title>
+<title>Score Atleta Evolutivo V18.1 — feedback visual forte no Modo Antebraço</title>
 <style>
 :root{--bg:#06111f;--card:#111f33;--card2:#172842;--line:rgba(255,255,255,.12);--txt:#f8fafc;--muted:#9fb0c8;--g:#18b66f;--b:#3b82f6;--p:#8b5cf6;--r:#ef4444;--y:#f59e0b}
 *{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top,#172554,#06111f 42%,#020617);color:var(--txt);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;max-width:850px;margin-inline:auto;padding:10px 10px 88px;user-select:none;-webkit-tap-highlight-color:transparent}
@@ -61,11 +61,18 @@ h1,h2,h3{margin:0}h1{font-size:19px}h2{font-size:18px}.small{color:var(--muted);
 .dayChartCaption{text-align:center;color:var(--muted);font-size:11px;margin-top:8px;line-height:1.35}
 #pocketToggle.active{background:linear-gradient(180deg,#7c3aed,#5b21b6);border-color:rgba(196,181,253,.5)}
 .pocketHint{display:block;color:#cbd5e1;font-size:11px;line-height:1.35;margin-top:7px}
-#pocketOverlay{position:fixed;inset:0;z-index:10000;background:#000;display:none;align-items:center;justify-content:center;text-align:center;padding:18px;overscroll-behavior:none;user-select:none;-webkit-user-select:none;transition:background .14s ease}
+#pocketOverlay{position:fixed;inset:0;z-index:10000;background:#000;display:none;align-items:center;justify-content:center;text-align:center;padding:18px;overscroll-behavior:none;user-select:none;-webkit-user-select:none;transition:none!important}
 #pocketOverlay.on{display:flex}
-#pocketOverlay.armGreen{background:#08783f}
-#pocketOverlay.armYellow{background:#d89205;color:#171006}
-#pocketOverlay.armNeutral{background:#000}
+/* V18.1: cores propositalmente muito fortes para leitura periférica no campo. */
+#pocketOverlay.armGreen{background:#00c853!important;color:#fff!important}
+#pocketOverlay.armYellow{background:#ffc400!important;color:#171006!important}
+#pocketOverlay.armNeutral{background:#000!important;color:#fff!important}
+#pocketOverlay.armGreen::before,#pocketOverlay.armYellow::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:0}
+#pocketOverlay.armGreen::before{box-shadow:inset 0 0 0 10px rgba(255,255,255,.24)}
+#pocketOverlay.armYellow::before{box-shadow:inset 0 0 0 10px rgba(0,0,0,.12)}
+#pocketOverlay .pocketBox{position:relative;z-index:1}
+#pocketOverlay.armFlash{animation:armScreenFlash .28s ease-out}
+@keyframes armScreenFlash{0%{filter:brightness(.45)}35%{filter:brightness(1.35)}100%{filter:brightness(1)}}
 body.pocketLocked{overflow:hidden;overscroll-behavior:none}
 .pocketBox{width:min(560px,100%);display:flex;flex-direction:column;align-items:center;gap:11px;color:#fff}
 #pocketOverlay.armYellow .pocketBox{color:#171006}
@@ -159,7 +166,7 @@ body.pocketLocked{overflow:hidden;overscroll-behavior:none}
 </style>
 </head>
 <body>
-<header class="top"><div><h1>Score Atleta Evolutivo <span style="font-size:11px;color:#f59e0b;vertical-align:middle">V18.0</span></h1><div id="sub" class="small">CTP • CTD • conduta • acompanhamento por evidências</div></div><button class="btn" id="gear">⚙️</button></header>
+<header class="top"><div><h1>Score Atleta Evolutivo <span style="font-size:11px;color:#f59e0b;vertical-align:middle">V18.1</span></h1><div id="sub" class="small">CTP • CTD • conduta • acompanhamento por evidências</div></div><button class="btn" id="gear">⚙️</button></header>
 
 <section id="home" class="screen on">
 <div class="panel">
@@ -280,11 +287,11 @@ body.pocketLocked{overflow:hidden;overscroll-behavior:none}
 <div id="groupModal" class="modal"><div class="box"><h2>3 · Atividade — Fundamental e Suporte</h2><div class="small">Todos começam na Fundamental. Toque nos atletas que irão para o Suporte; ao tocar novamente, eles voltam para a Fundamental.</div><div class="groupColumns"><div class="groupCol"><h3>Fundamental <span id="fundCount" class="pill">0</span></h3><div id="fundList"></div></div><div class="groupCol support"><h3>Suporte <span id="supportCount" class="pill">0</span></h3><div id="supportList"></div></div></div><button id="confirmGroups" class="btn good" style="width:100%;margin-top:12px">▶ Iniciar atividade</button><button id="cancelGroups" class="btn ghost" style="width:100%;margin-top:8px">Cancelar</button></div></div>
 <div id="pendingReviewModal" class="modal"><div class="box"><div class="flex between"><h2>⚠️ Revisar voz</h2><span id="pendingReviewCount" class="pill">0 pendências</span></div><div class="small">Só aparecem comandos em que o aplicativo entendeu a ação, mas não conseguiu identificar com segurança o atleta. As sugestões vêm apenas dos presentes nesta chamada.</div><div id="pendingReviewBody"></div><button id="pendingIgnoreAll" class="btn ghost" style="width:100%;margin-top:10px">Ignorar pendências restantes e continuar</button><button id="pendingBack" class="btn ghost" style="width:100%;margin-top:8px">Voltar ao treino</button></div></div>
 <div id="finishModal" class="modal"><div class="box"><h2>Finalizar treino?</h2><div id="finishSummary" class="small" style="margin:8px 0 14px">—</div><button id="finishSave" class="btn good" style="width:100%;margin-bottom:8px">💾 Salvar, sincronizar e gerar relatório</button><button id="finishDiscard" class="btn danger" style="width:100%;margin-bottom:8px">🗑️ Descartar treino e apagar tudo deste treino</button><button id="finishCancel" class="btn ghost" style="width:100%">Continuar treino</button><div class="small" style="margin-top:10px">No modo Escolinha, salvar também envia o treino para a Central. Se estiver sem internet, o treino fica pendente para sincronização posterior. Descartar remove somente esta sessão e não altera o cadastro da Central.</div></div></div>
-<div id="pocketOverlay" aria-hidden="true"><div class="pocketBox"><div class="pocketIcon">🎙️</div><h2 id="pocketTitle">Modo Antebraço</h2><div id="pocketState" class="pocketState">Escuta ativa</div><div id="pocketTheme" class="pocketTheme">—</div><div id="pocketLast" class="pocketLast">Aguardando comando. Nomes soltos são ignorados.</div><div id="armChoices" class="armChoices"></div><div class="armControls"><button id="armListenNow">🎙️ Reativar escuta</button><button id="armDiscardPending">✕ Descartar pendência</button></div><button id="pocketUnlock">Segure por 2,5 segundos para sair</button><div class="pocketFoot">A tela preta reduz atividade visual, mas precisa permanecer ativa para o navegador manter a escuta. Wake Lock é usado quando disponível. Somente o verde confirma que um registro foi efetivado.</div></div></div>
+<div id="pocketOverlay" aria-hidden="true"><div class="pocketBox"><div class="pocketIcon">🎙️</div><h2 id="pocketTitle">Modo Antebraço</h2><div id="pocketState" class="pocketState">Escuta ativa</div><div id="pocketTheme" class="pocketTheme">—</div><div id="pocketLast" class="pocketLast">Aguardando comando. Nomes soltos são ignorados.</div><div id="armChoices" class="armChoices"></div><div class="armControls"><button id="armListenNow">🎙️ Reativar escuta</button><button id="armDiscardPending">✕ Descartar pendência</button></div><button id="pocketUnlock">Segure por 2,5 segundos para sair</button><div class="pocketFoot">A tela preta reduz atividade visual, mas precisa permanecer ativa para o navegador manter a escuta. Wake Lock é usado quando disponível. Somente o VERDE confirma registro. VERDE ocupa a tela por ~1,3 s; AMARELO permanece até você escolher o atleta.</div></div></div>
 
 <script>
 const KEY="score_atleta_evolutivo_v2_persistente";
-const APP_VERSION="18.0";
+const APP_VERSION="18.1";
 const $=id=>document.getElementById(id);
 let data=load(), current=null;
 let voiceRecognition=null, voiceActive=false, voiceStarting=false, voiceRestartTimer=null, wakeLock=null, voiceRecent=[], collectiveTimer=null, lastVoiceRaw="", lastVoiceAt=0;
@@ -633,8 +640,26 @@ function armPendingCandidates(p){let cand=pendingCandidates(p),usable=cand.filte
 function armActionLabel(p){if(p.kind==='goal')return`⚽ ${p.value||1} gol${(p.value||1)>1?'s':''}`;if(p.kind==='ctd_attempt')return'Resposta sem acerto';return`${p.value>0?'+':''}${p.value}${p.value===1?' CTP':p.value===3?' CTD':p.value===-1?' conduta':''}`}
 function clearArmFeedbackTimer(){clearTimeout(armFeedbackTimer);armFeedbackTimer=null}
 function armSetVisual(kind='idle'){
- let o=$('pocketOverlay');if(!o)return;o.classList.remove('armGreen','armYellow','armNeutral');
- if(kind==='green')o.classList.add('armGreen');else if(kind==='yellow')o.classList.add('armYellow');else o.classList.add('armNeutral');
+ let o=$('pocketOverlay');if(!o)return;
+ o.classList.remove('armGreen','armYellow','armNeutral','armFlash');
+ // Além das classes, usa cor inline como redundância. Alguns WebViews/launchers
+ // mantêm estilos antigos em cache; o inline garante a troca imediatamente.
+ if(kind==='green'){
+   o.classList.add('armGreen');
+   o.style.setProperty('background','#00c853','important');
+   o.style.setProperty('color','#fff','important');
+ }else if(kind==='yellow'){
+   o.classList.add('armYellow');
+   o.style.setProperty('background','#ffc400','important');
+   o.style.setProperty('color','#171006','important');
+ }else{
+   o.classList.add('armNeutral');
+   o.style.setProperty('background','#000','important');
+   o.style.setProperty('color','#fff','important');
+ }
+ // Força um novo frame para a mudança não ser engolida por atualizações seguidas do DOM.
+ void o.offsetWidth;
+ if(kind==='green'||kind==='yellow'){o.classList.add('armFlash')}
 }
 function renderArmPending(p){
  if(!pocketMode||!p)return;clearArmFeedbackTimer();let {usable,ambiguous}=armPendingCandidates(p),arr=present();armSetVisual(ambiguous?'yellow':'neutral');
@@ -644,7 +669,7 @@ function renderArmPending(p){
  if(last)last.innerHTML=`<b>${esc(armActionLabel(p))}</b><br>Ouvido: ${esc(p.raw||'—')}${p.heard_name?`<br><span style="opacity:.78">Nome provável: ${esc(p.heard_name)}</span>`:''}`;
  if(choices){choices.innerHTML=usable.map(c=>`<button class="armChoice" data-arm-resolve="${esc(p.id)}" data-athlete="${esc(c.athlete.id)}">${esc(display(c.athlete,arr))}<small>${Math.round(c.score*100)}% de compatibilidade</small></button>`).join('');document.querySelectorAll('[data-arm-resolve]').forEach(b=>b.onclick=()=>resolvePending(b.dataset.armResolve,b.dataset.athlete))}
  let discard=$('armDiscardPending');if(discard){discard.disabled=false;discard.dataset.pendingId=p.id;discard.style.opacity='1'}
- try{if(navigator.vibrate){navigator.vibrate(0);navigator.vibrate(ambiguous?[70,55,70]:[180])}}catch(e){}
+ try{if(navigator.vibrate){navigator.vibrate(0);navigator.vibrate(ambiguous?[90,70,90]:[220])}}catch(e){}
 }
 function armPendingFeedback(p){if(!pocketMode||!p||p.resolved||p.discarded)return;renderArmPending(p)}
 function renderArmIdle(){
@@ -659,8 +684,9 @@ function pocketActionFeedback(aid,type,count=1){
  let title=$('pocketTitle'),st=$('pocketState'),ic=document.querySelector('.pocketIcon'),last=$('pocketLast'),choices=$('armChoices');
  if(title)title.textContent='REGISTRADO';if(st){st.textContent=`✓ ${label}`;st.classList.remove('confirm');void st.offsetWidth;st.classList.add('confirm')}if(last)last.textContent=type==='goal'?`Registro confirmado • ${name}`:`Total de ${name}: ${total} pts`;if(choices)choices.innerHTML='';let discard=$('armDiscardPending');if(discard){discard.disabled=true;discard.removeAttribute('data-pending-id');discard.style.opacity='.45'};
  if(ic){ic.textContent='✓';ic.classList.remove('confirm');void ic.offsetWidth;ic.classList.add('confirm')}
- try{if(navigator.vibrate){navigator.vibrate(0);navigator.vibrate([90])}}catch(e){}
- armFeedbackTimer=setTimeout(()=>{if(ic)ic.textContent='🎙️';renderArmIdle()},900);
+ try{if(navigator.vibrate){navigator.vibrate(0);navigator.vibrate([120])}}catch(e){}
+ // Mantém o verde tempo suficiente para ser percebido mesmo com o braço em movimento.
+ armFeedbackTimer=setTimeout(()=>{if(ic)ic.textContent='🎙️';renderArmIdle()},1350);
 }
 async function requestWakeLock(){
  try{
