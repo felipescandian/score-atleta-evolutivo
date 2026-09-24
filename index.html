@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Score Atleta Evolutivo V18.3 — amarelo obrigatório na escolha de atleta</title>
+<title>Score Atleta Evolutivo V18.7 — alerta amarelo persistente + feedback PDF premium</title>
 <style>
 :root{--bg:#06111f;--card:#111f33;--card2:#172842;--line:rgba(255,255,255,.12);--txt:#f8fafc;--muted:#9fb0c8;--g:#18b66f;--b:#3b82f6;--p:#8b5cf6;--r:#ef4444;--y:#f59e0b}
 *{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top,#172554,#06111f 42%,#020617);color:var(--txt);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;max-width:850px;margin-inline:auto;padding:10px 10px 88px;user-select:none;-webkit-tap-highlight-color:transparent}
@@ -170,6 +170,7 @@ body.pocketLocked{overflow:hidden;overscroll-behavior:none}
 
 
 
+/* ===== V18.6: voz segura — amarelo persistente até confirmar atleta ===== */
 /* ===== V18.4: avaliação final dos pilares no Evolutivo Performance ===== */
 .personalEvalBox{max-height:88vh}.personalEvalIntro{margin:8px 0 12px;padding:10px 12px;border-radius:14px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.28);color:#d9d3c4;font-size:12px;line-height:1.45}
 .personalEvalAthlete{border:1px solid rgba(214,168,67,.30);border-radius:18px;background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(2,6,23,.24));padding:12px;margin-top:10px}.personalEvalAthleteHead{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:9px}.personalEvalAthleteHead h3{font-size:16px}.personalEvalTotal{font-size:12px;color:#f1cc72;font-weight:1000;white-space:nowrap}
@@ -181,7 +182,7 @@ body.pocketLocked{overflow:hidden;overscroll-behavior:none}
 </style>
 </head>
 <body>
-<header class="top"><div><h1>Score Atleta Evolutivo <span style="font-size:11px;color:#f59e0b;vertical-align:middle">V18.4</span></h1><div id="sub" class="small">CTP • CTD • conduta • acompanhamento por evidências</div></div><button class="btn" id="gear">⚙️</button></header>
+<header class="top"><div><h1>Score Atleta Evolutivo <span style="font-size:11px;color:#f59e0b;vertical-align:middle">V18.7</span></h1><div id="sub" class="small">CTP • CTD • conduta • acompanhamento por evidências</div></div><button class="btn" id="gear">⚙️</button></header>
 
 <section id="home" class="screen on">
 <div class="panel">
@@ -245,7 +246,7 @@ body.pocketLocked{overflow:hidden;overscroll-behavior:none}
   <button id="armColorTest" class="smallBtn">🧪 Testar verde/amarelo</button>
   <span id="micEnv" class="small"></span>
  </div>
- <span class="pocketHint">Modo antebraço: tela preta econômica durante a escuta. <b>Verde</b> = registro feito; <b>amarelo</b> = comando entendido, mas é preciso escolher o atleta; <b>vibração sem cor</b> = houve tentativa de comando, mas o app não registrou com segurança.</span>
+ <span class="pocketHint">Modo antebraço: tela preta econômica durante a escuta. <b>Verde</b> = nome confirmado e registro feito; <b>amarelo</b> = o comando foi entendido, mas o nome do atleta não foi confirmado. O amarelo permanece até você tocar no atleta correto ou descartar o comando.</span>
  <div class="small" style="margin-top:8px">Comandos naturais: <b>“ponto pro/para Pierre”</b> ou <b>“1 ponto para…”</b> = CTP +1; <b>“3 pontos para…”</b> (aceita “três”, “treis”, “treiz” e “trez”) ou <b>“[nome] acertou a resposta”</b> = CTD +3; <b>“menos 1 para…”</b> = conduta/compromisso; <b>“gol para…”</b> ou <b>“[nome] fez gol”</b> = gol separado do score; <b>“[nome] errou a resposta”</b> = tentativa sem acerto. Nomes ditos durante instruções normais não geram registro nem vibração.</div>
  <div id="reflectionState" class="voiceLast" style="min-height:auto"><span class="small">🧠 Nenhuma reflexão coletiva aberta.</span></div>
  <div id="voiceLast" class="voiceLast"><span class="small">Nenhum comando de voz ainda.</span></div>
@@ -589,7 +590,7 @@ function normalizeVoiceCommandText(raw){
    .replace(/\s+/g,' ')
    .trim();
 }
-function phoneticNameKey(x){return norm(x).replace(/ph/g,'f').replace(/th/g,'t').replace(/h/g,'').replace(/y/g,'i').replace(/w/g,'v').replace(/o$/,'u')}
+function phoneticNameKey(x){return norm(x).replace(/ph/g,'f').replace(/th/g,'t').replace(/h/g,'').replace(/y/g,'i').replace(/w/g,'v').replace(/([a-zç])\1+/g,'$1').replace(/o$/,'u')}
 function nameKeyVariants(x){let a=[norm(x),phoneticNameKey(x)];return[...new Set(a.filter(Boolean))]}
 function voiceDictionary(){let arr=present();return arr.map(a=>{let spoken=voiceName(a),labels=[spoken,firstName(a),a.name,display(a,arr)].filter(Boolean),keys=[...new Set(labels.flatMap(nameKeyVariants))];return{athlete:a,spoken,keys}}).filter(x=>x.keys.length)}
 function findAthletesInVoiceSegment(segment){let base=norm(segment).replace(/[^a-z0-9ç ]/gi,' ').replace(/\s+/g,' ').trim(),forms=[base,phoneticNameKey(base)],dict=voiceDictionary(),hits=[];for(let d of dict){let best=null;for(let txt of forms){let padded=' '+txt+' ';for(let key of d.keys){let pos=padded.lastIndexOf(' '+key+' ');if(pos>=0){let cand={pos,specificity:key.length};if(!best||cand.pos>best.pos||(cand.pos===best.pos&&cand.specificity>best.specificity))best=cand}}}if(best)hits.push({pos:best.pos,specificity:best.specificity,athlete:d.athlete,spoken:d.spoken,confidence:1})}if(!hits.length)return[];let lastPos=Math.max(...hits.map(h=>h.pos)),near=hits.filter(h=>h.pos===lastPos),maxSpec=Math.max(...near.map(h=>h.specificity||0));return near.filter(h=>h.specificity===maxSpec).sort((a,b)=>a.athlete.name.localeCompare(b.athlete.name,'pt-BR'))}
@@ -597,8 +598,8 @@ function levenshtein(a,b){a=String(a||'');b=String(b||'');let m=Array.from({leng
 function similarity(a,b){a=phoneticNameKey(a);b=phoneticNameKey(b);if(!a||!b)return 0;return 1-levenshtein(a,b)/Math.max(a.length,b.length)}
 function cleanHeardName(seg){return normalizeVoiceCommandText(seg).replace(/\b(?:ponto|pontos|para|pra|pro|ao|menos|resposta|errou|acertou|certa|certo|correta|correto|respondeu|de|do|da|gol|gols|fez|marcou|fazer|marcar|feito|marcado|por)\b/g,' ').replace(/\b(?:1|2|3|um|dois|tres)\b/g,' ').replace(/\s+/g,' ').trim()}
 function voiceCandidateScores(seg){let heard=cleanHeardName(seg),tokens=heard.split(' ').filter(Boolean),phrases=[heard,...tokens];if(tokens.length>=2)for(let i=0;i<tokens.length-1;i++)phrases.push(tokens[i]+' '+tokens[i+1]);let arr=present(),scores=arr.map(a=>{let keys=[voiceName(a),firstName(a),display(a,arr)],best=0;for(let p of phrases)for(let k of keys)best=Math.max(best,similarity(p,k));return{athlete:a,score:best}}).sort((a,b)=>b.score-a.score);return{heard,scores}}
-function safeFuzzyAthlete(seg){let {scores}=voiceCandidateScores(seg);if(!scores.length)return null;let best=scores[0],second=scores[1]?.score||0,keyLen=phoneticNameKey(voiceName(best.athlete)).length,threshold=keyLen<=4?.64:.72;if(best.score>=threshold&&best.score-second>=.18)return{pos:0,athlete:best.athlete,spoken:voiceName(best.athlete),confidence:best.score};return null}
-function resolveVoiceHits(seg){let exact=findAthletesInVoiceSegment(seg);if(exact.length===1)return exact;if(exact.length>1)return[];let fuzzy=safeFuzzyAthlete(seg);return fuzzy?[fuzzy]:[]}
+function safeFuzzyAthlete(seg){/* V18.6: similaridade serve apenas para sugerir candidatos na tela amarela. Nunca registra ponto automaticamente. */return null}
+function resolveVoiceHits(seg){let exact=findAthletesInVoiceSegment(seg);if(exact.length!==1)return[];let hit=exact[0],scores=voiceCandidateScores(seg).scores;if(scores.length>1){let best=scores[0],second=scores[1];/* Se houver outro nome foneticamente muito próximo, pede confirmação em vez de arriscar pontuar o atleta errado. */if(!best||best.athlete.id!==hit.athlete.id)return[];if(second&&second.score>=.76&&(best.score-second.score)<.22)return[]}return exact}
 function queueVoicePending({kind='score',value=0,raw='',heardName='',source=null}){ensureTrainingFlow();let at=new Date().toISOString(),ctx=captureEventContext(null,at),p={id:'PEND-'+Date.now().toString(36).toUpperCase()+'-'+Math.floor(Math.random()*9999),kind,value,raw,heard_name:cleanHeardName(heardName||raw),source:source||automaticCtdSource(),at,elapsed_ms:ctx.elapsed_ms,stage:ctx.stage,stage_label:ctx.stage_label,activity_block:ctx.activity_block,group_snapshot:ctx.group_snapshot,resolved:false,discarded:false};current.voicePending.push(p);renderTrainingFlow();if(pocketMode)setTimeout(()=>armPendingFeedback(p),0);return p}
 function scoreValueFromCommand(cmd){cmd=normalizeVoiceCommandText(cmd);if(/menos\s+(?:1|um)|-\s*1/.test(cmd))return-1;if(/\b(?:3|tres)\b|ponto\s+de\s+(?:3|tres)|acertou\s+(?:a\s+)?resposta|resposta\s+(?:certa|correta)/.test(cmd))return 3;return 1}
 function goalCountWord(x){x=norm(x);if(x==='2'||x==='dois')return 2;if(x==='3'||x==='tres')return 3;return 1}
@@ -621,10 +622,6 @@ function parseExplicitThreePointVoice(t,raw,allowPending=true){
  if(!heard){m=t.match(/^(.+?)\s+(?:(?:ganhou|recebeu)\s+)?(?:3|tres)\s+ponto(?:s)?\b/);if(m)heard=m[1]}
  if(!heard)return 0;
  let hits=resolveVoiceHits(heard),source=automaticCtdSource();
- if(!hits.length&&current?.mode==='personal'){
-   let only=personalStudents();
-   if(only.length===1)hits=[{athlete:only[0],confidence:1}];
- }
  if(!hits.length){
    if(allowPending){queueVoicePending({kind:'score',value:3,raw,heardName:heard,source});$("voiceLast").innerHTML=`<b>⚠️ +3 pendente</b><div class=small>Ouvido: ${esc(raw)}</div>`;addVoiceLog('⚠️ +3 pendente');renderTrainingFlow();return 1}
    return 0;
@@ -651,20 +648,16 @@ function parseVoiceCommand(raw,{allowPending=true}={}){if(!current||!raw)return 
  for(let i=0;i<ms.length;i++){let m=ms[i],start=m.index+m[0].length,nextPoint=i+1<ms.length?ms[i+1].index:t.length,nextErr=errs.find(e=>e.index>start)?.index??t.length,nextCorrect=corrects.find(e=>e.index>start)?.index??t.length,nextRight=rights.find(e=>e.index>start)?.index??t.length,end=Math.min(nextPoint,nextErr,nextCorrect,nextRight),seg=t.slice(start,end),value=scoreValueFromCommand(m[0]),hits=resolveVoiceHits(seg),seen=new Set();if(!hits.length){if(allowPending){queueVoicePending({kind:'score',value,raw,heardName:seg,source:value===3?automaticCtdSource():null});summary.push(`⚠️ ${value>0?'+':''}${value} pendente`);handled++}continue}for(let h of hits){if(seen.has(h.athlete.id))continue;seen.add(h.athlete.id);let meta={raw};if(value===3)meta.ctdSource=automaticCtdSource();point(h.athlete.id,value===1?'one':value===3?'three':'minus',true,meta);summary.push(value===-1?`${h.athlete.name} −1 (conduta/compromisso)`:`${h.athlete.name} +${value}${value===1?' (CTP)':' (CTD)'}`);launched++;handled++}}
  if(!handled&&/\b(?:3|tres)\b/.test(t)&&/\b(?:ponto|pontos|resposta|acertou|certa|correta)\b/.test(t)){
    let hits=resolveVoiceHits(t),source=automaticCtdSource();
-   if(!hits.length&&current?.mode==='personal'){
-     let only=personalStudents();
-     if(only.length===1)hits=[{athlete:only[0],confidence:1}];
-   }
    if(hits.length){let h=hits[0];point(h.athlete.id,'three',true,{raw,ctdSource:source});summary.push(`${h.athlete.name} +3 (CTD)`);launched++;handled++}
    else if(allowPending){queueVoicePending({kind:'score',value:3,raw,heardName:t,source});summary.push('⚠️ +3 pendente');handled++}
  }
- if(!handled&&!ms.length&&!corrects.length&&!rights.length){let simple=t.match(/\b(menos\s+(?:1|um)|-\s*1|3|tres|1|um)\s+ponto(?:s)?\b/);if(simple){let value=scoreValueFromCommand(simple[0]),hits=resolveVoiceHits(t);if(!hits.length&&value===3&&current?.mode==='personal'){let only=personalStudents();if(only.length===1)hits=[{athlete:only[0],confidence:1}]}if(hits.length===1){let meta={raw};if(value===3)meta.ctdSource=automaticCtdSource();point(hits[0].athlete.id,value===1?'one':value===3?'three':'minus',true,meta);summary.push(`${hits[0].athlete.name} ${value>0?'+':''}${value}`);launched++;handled++}else if(allowPending){queueVoicePending({kind:'score',value,raw,heardName:t,source:value===3?automaticCtdSource():null});summary.push(`⚠️ ${value>0?'+':''}${value} pendente`);handled++}}}
+ if(!handled&&!ms.length&&!corrects.length&&!rights.length){let simple=t.match(/\b(menos\s+(?:1|um)|-\s*1|3|tres|1|um)\s+ponto(?:s)?\b/);if(simple){let value=scoreValueFromCommand(simple[0]),hits=resolveVoiceHits(t);if(hits.length===1){let meta={raw};if(value===3)meta.ctdSource=automaticCtdSource();point(hits[0].athlete.id,value===1?'one':value===3?'three':'minus',true,meta);summary.push(`${hits[0].athlete.name} ${value>0?'+':''}${value}`);launched++;handled++}else if(allowPending){queueVoicePending({kind:'score',value,raw,heardName:t,source:value===3?automaticCtdSource():null});summary.push(`⚠️ ${value>0?'+':''}${value} pendente`);handled++}}}
  if(handled){$("voiceLast").innerHTML=`<b>${summary.some(x=>x.includes('⚠️'))?'⚠️':'✅'} ${esc(summary.join(' · '))}</b><div class=small>Ouvido: ${esc(raw)}</div>`;addVoiceLog((summary.some(x=>x.includes('⚠️'))?'⚠️ ':'✅ ')+summary.join(' · '));if(launched)voiceBeep(Math.max(1,launched));renderReflectionState();renderTrainingFlow()}else if(allowPending){let guess=inferVoiceIntent(t);if(guess){queueVoicePending({kind:guess.kind,value:guess.value,raw,heardName:guess.heard||t,source:guess.value===3?automaticCtdSource():null});$("voiceLast").innerHTML=`<b>⚠️ Comando percebido, mas não registrado.</b><div class=small>${esc(raw)}</div>`;addVoiceLog('⚠️ Não registrado: '+raw);return 1}}return handled}
-function processRecognitionAlternatives(alts){alts=(alts||[]).map(x=>String(x||'').trim()).filter(Boolean);if(!alts.length)return;if($("voiceRaw"))$("voiceRaw").textContent='🎧 Último texto reconhecido: '+alts[0];let key=normalizeVoiceCommandText(alts[0]),now=Date.now();if(key===lastVoiceRaw&&now-lastVoiceAt<1200)return;lastVoiceRaw=key;lastVoiceAt=now;let semantic=alts.find(x=>/acertou\s+(?:a\s+)?resposta|respondeu\s+(?:certo|corretamente)\s+(?:a\s+)?resposta|resposta\s+(?:certa|correta)/.test(normalizeVoiceCommandText(x)));if(semantic){let n=parseVoiceCommand(semantic,{allowPending:false});if(n)return n}for(let raw of alts){let n=parseVoiceCommand(raw,{allowPending:false});if(n)return n}return parseVoiceCommand(alts[0],{allowPending:true})}
+function processRecognitionAlternatives(alts){alts=(alts||[]).map(x=>String(x||'').trim()).filter(Boolean);if(!alts.length)return;if($("voiceRaw"))$("voiceRaw").textContent='🎧 Último texto reconhecido: '+alts[0];let key=normalizeVoiceCommandText(alts[0]),now=Date.now();if(key===lastVoiceRaw&&now-lastVoiceAt<1200)return;lastVoiceRaw=key;lastVoiceAt=now;/* V18.6: a primeira transcrição é a referência. Se o comando for entendido mas o nome não fechar com segurança, vira pendência amarela. */return parseVoiceCommand(alts[0],{allowPending:true})}
 function pendingCandidates(p){return voiceCandidateScores(p.heard_name||p.raw).scores.slice(0,3)}
 function pendingContextText(p){let x=`${formatDuration(p.elapsed_ms)} · ${stageInfo(p.stage).label}`;if(p.stage==='atividade'&&p.activity_block)x+=` · Bloco ${p.activity_block}`;return x}
 function renderPendingReview(){let list=unresolvedVoicePending();$('pendingReviewCount').textContent=`${list.length} pendência(s)`;if(!list.length){$('pendingReviewBody').innerHTML='<div class=empty>Todas as pendências foram resolvidas.</div>';setTimeout(()=>{ $('pendingReviewModal').classList.remove('on');openFinishModal()},250);return}let p=list[0],cand=pendingCandidates(p),arr=present();$('pendingReviewBody').innerHTML=`<div class="pendingCard"><span class="stageTag">${esc(pendingContextText(p))}</span><div class="small" style="margin-top:8px">Ouvido</div><div class="pendingHeard">“${esc(p.raw)}”</div><div class="small">${p.kind==='score'?`Valor interpretado: <b>${p.value>0?'+':''}${p.value}</b>`:p.kind==='goal'?`Gol interpretado: <b>⚽ ${p.value||1}</b> (separado do score)`:'Tentativa de resposta sem acerto'} · Nome ouvido: <b>${esc(p.heard_name||'não isolado')}</b></div><div class="candidateGrid">${cand.map(c=>`<button data-resolve-pending="${p.id}" data-athlete="${c.athlete.id}">${esc(display(c.athlete,arr))}<br><span class=small>${Math.round(c.score*100)}% similar</span></button>`).join('')}</div><div class="pendingAll"><select id="pendingAllSelect"><option value="">Outro atleta presente…</option>${arr.map(a=>`<option value="${a.id}">${esc(a.name)}</option>`).join('')}</select><button class="smallBtn" id="pendingUseSelect" style="width:100%;margin-top:6px">Usar atleta selecionado</button><button class="smallBtn" data-discard-pending="${p.id}" style="width:100%;margin-top:6px">Descartar este comando</button></div></div>`;document.querySelectorAll('[data-resolve-pending]').forEach(b=>b.onclick=()=>resolvePending(b.dataset.resolvePending,b.dataset.athlete));document.querySelectorAll('[data-discard-pending]').forEach(b=>b.onclick=()=>discardPending(b.dataset.discardPending));$('pendingUseSelect').onclick=()=>{let aid=$('pendingAllSelect').value;if(!aid)return alert('Escolha um atleta.');resolvePending(p.id,aid)}}
-function resolvePending(pid,aid){let p=(current.voicePending||[]).find(x=>x.id===pid),a=findSessionAthlete(aid);if(!p||!a)return;let ctx={stage:p.stage,stage_label:stageInfo(p.stage).label,elapsed_ms:p.elapsed_ms,activity_block:p.activity_block||null,activity_context:p.stage==='atividade'?groupFromSnapshot(aid,p.group_snapshot):null,group_snapshot:p.group_snapshot||null};if(p.kind==='score')point(aid,p.value===1?'one':p.value===3?'three':'minus',true,{raw:p.raw,ctdSource:p.source,atOverride:p.at,contextOverride:ctx,groupSnapshot:p.group_snapshot,fromPending:true});else if(p.kind==='goal')registerGoal(aid,p.value||1,true,{raw:p.raw,atOverride:p.at,contextOverride:ctx,groupSnapshot:p.group_snapshot,fromPending:true});else{registerCtdAttempt(aid,false,p.source||'directed',p.raw,true,{atOverride:p.at,contextOverride:ctx,groupSnapshot:p.group_snapshot});if(pocketMode){try{if(navigator.vibrate)navigator.vibrate([90])}catch(e){}}}p.resolved=true;p.resolved_athlete_id=aid;p.resolved_at=new Date().toISOString();if($("pendingReviewModal")?.classList.contains('on'))renderPendingReview();else if(pocketMode&&p.kind==='ctd_attempt')setTimeout(()=>renderArmIdle(),300);renderTrainingFlow()}
+function resolvePending(pid,aid){let p=(current.voicePending||[]).find(x=>x.id===pid),a=findSessionAthlete(aid);if(!p||!a)return;let ctx={stage:p.stage,stage_label:stageInfo(p.stage).label,elapsed_ms:p.elapsed_ms,activity_block:p.activity_block||null,activity_context:p.stage==='atividade'?groupFromSnapshot(aid,p.group_snapshot):null,group_snapshot:p.group_snapshot||null};p.resolved=true;p.resolved_athlete_id=aid;p.resolved_at=new Date().toISOString();if(p.kind==='score')point(aid,p.value===1?'one':p.value===3?'three':'minus',true,{raw:p.raw,ctdSource:p.source,atOverride:p.at,contextOverride:ctx,groupSnapshot:p.group_snapshot,fromPending:true});else if(p.kind==='goal')registerGoal(aid,p.value||1,true,{raw:p.raw,atOverride:p.at,contextOverride:ctx,groupSnapshot:p.group_snapshot,fromPending:true});else{registerCtdAttempt(aid,false,p.source||'directed',p.raw,true,{atOverride:p.at,contextOverride:ctx,groupSnapshot:p.group_snapshot});if(pocketMode){try{if(navigator.vibrate)navigator.vibrate([90])}catch(e){}}}if($("pendingReviewModal")?.classList.contains('on'))renderPendingReview();else if(pocketMode&&p.kind==='ctd_attempt')setTimeout(()=>renderArmIdle(),300);renderTrainingFlow()}
 function discardPending(pid){let p=(current.voicePending||[]).find(x=>x.id===pid);if(!p)return;p.discarded=true;p.discarded_at=new Date().toISOString();if($("pendingReviewModal")?.classList.contains('on'))renderPendingReview();else if(pocketMode)renderArmIdle();renderTrainingFlow()}
 function ensureFeedbackAudio(){
  try{
@@ -691,7 +684,7 @@ function voiceBeep(count=1){
  if(pocketMode)return;
  playFeedbackTones(count>1?[{f:860,d:.13,g:.09},{f:1040,d:.13,g:.09}]:[{f:780,d:.15,g:.08}]);
 }
-function armPendingCandidates(p){let cand=pendingCandidates(p),usable=cand.filter(c=>c.score>=.48).slice(0,3),strong=cand.filter(c=>c.score>=.78).slice(0,3);/* V18.3: se o app oferece 2+ atletas para escolha, o estado visual é obrigatoriamente amarelo. Não depende mais da diferença de similaridade. */let needsChoice=usable.length>=2;return{cand,usable,strong,ambiguous:needsChoice,needsChoice}}
+function armPendingCandidates(p){let cand=pendingCandidates(p),usable=cand.slice(0,3),strong=cand.filter(c=>c.score>=.78).slice(0,3);/* V18.6: toda pendência de comando exige confirmação. Personal com 1 atleta mostra 1 botão; Escola mostra até 3 candidatos. */let needsChoice=true;return{cand,usable,strong,ambiguous:true,needsChoice}}
 function armActionLabel(p){if(p.kind==='goal')return`⚽ ${p.value||1} gol${(p.value||1)>1?'s':''}`;if(p.kind==='ctd_attempt')return'Resposta sem acerto';return`${p.value>0?'+':''}${p.value}${p.value===1?' CTP':p.value===3?' CTD':p.value===-1?' conduta':''}`}
 function clearArmFeedbackTimer(){clearTimeout(armFeedbackTimer);armFeedbackTimer=null}
 function armSetVisual(kind='idle'){
@@ -717,14 +710,14 @@ function armSetVisual(kind='idle'){
  if(kind==='green'||kind==='yellow'){o.classList.add('armFlash')}
 }
 function renderArmPending(p){
- if(!pocketMode||!p)return;clearArmFeedbackTimer();let {usable,needsChoice}=armPendingCandidates(p),arr=present();/* A própria existência de múltiplas opções exibidas define o amarelo. */armSetVisual(needsChoice?'yellow':'neutral');
+ if(!pocketMode||!p)return;clearArmFeedbackTimer();let {usable}=armPendingCandidates(p),arr=present();/* V18.6: toda pendência fica AMARELA e só sai ao confirmar ou descartar. */armSetVisual('yellow');
  let state=$('pocketState'),title=$('pocketTitle'),last=$('pocketLast'),choices=$('armChoices');
- if(title)title.textContent=needsChoice?'ESCOLHA O ATLETA':'Comando não registrado';
- if(state)state.textContent=needsChoice?'⚠️ COMANDO ENTENDIDO · escolha quem recebe':'📳 Ouvi uma tentativa de comando';
- if(last)last.innerHTML=`<b>${esc(armActionLabel(p))}</b><br>Ouvido: ${esc(p.raw||'—')}${p.heard_name?`<br><span style="opacity:.78">Nome provável: ${esc(p.heard_name)}</span>`:''}`;
+ if(title)title.textContent='CONFIRME O ATLETA';
+ if(state)state.textContent='⚠️ COMANDO ENTENDIDO · nome não confirmado';
+ if(last)last.innerHTML=`<b>${esc(armActionLabel(p))}</b><br>Ouvido: ${esc(p.raw||'—')}${p.heard_name?`<br><span style="opacity:.78">Nome ouvido: ${esc(p.heard_name)}</span>`:''}`;
  if(choices){choices.innerHTML=usable.map(c=>`<button class="armChoice" data-arm-resolve="${esc(p.id)}" data-athlete="${esc(c.athlete.id)}">${esc(display(c.athlete,arr))}<small>${Math.round(c.score*100)}% de compatibilidade</small></button>`).join('');document.querySelectorAll('[data-arm-resolve]').forEach(b=>b.onclick=()=>resolvePending(b.dataset.armResolve,b.dataset.athlete))}
  let discard=$('armDiscardPending');if(discard){discard.disabled=false;discard.dataset.pendingId=p.id;discard.style.opacity='1'}
- try{if(navigator.vibrate){navigator.vibrate(0);navigator.vibrate(needsChoice?[90,70,90]:[220])}}catch(e){}
+ try{if(navigator.vibrate){navigator.vibrate(0);navigator.vibrate([90,70,90])}}catch(e){}
 }
 function armPendingFeedback(p){if(!pocketMode||!p||p.resolved||p.discarded)return;renderArmPending(p)}
 function renderArmIdle(){
@@ -735,7 +728,7 @@ function pocketActionFeedback(aid,type,count=1){
  let a=findSessionAthlete(aid),name=a?display(a,present()):'Atleta',s=current?.scores?.[aid]||{one:0,three:0,minus:0};
  let total=+(s.one||0)+3*+(s.three||0)-+(s.minus||0),label='';
  if(type==='three')label=`+3 CTD • ${name}`;else if(type==='minus')label=`−1 • ${name}`;else if(type==='goal'){let goals=+(current?.goals?.[aid]||0);label=`⚽ Gol • ${name} • ${goals} no treino`}else label=`+1 CTP • ${name}`;
- pocketFeedbackCount++;clearArmFeedbackTimer();armSetVisual('green');
+ pocketFeedbackCount++;clearArmFeedbackTimer();let unresolved=unresolvedVoicePending();if(unresolved.length){renderArmPending(unresolved[unresolved.length-1]);return}armSetVisual('green');
  let title=$('pocketTitle'),st=$('pocketState'),ic=document.querySelector('.pocketIcon'),last=$('pocketLast'),choices=$('armChoices');
  if(title)title.textContent='REGISTRADO';if(st){st.textContent=`✓ ${label}`;st.classList.remove('confirm');void st.offsetWidth;st.classList.add('confirm')}if(last)last.textContent=type==='goal'?`Registro confirmado • ${name}`:`Total de ${name}: ${total} pts`;if(choices)choices.innerHTML='';let discard=$('armDiscardPending');if(discard){discard.disabled=true;discard.removeAttribute('data-pending-id');discard.style.opacity='.45'};
  if(ic){ic.textContent='✓';ic.classList.remove('confirm');void ic.offsetWidth;ic.classList.add('confirm')}
