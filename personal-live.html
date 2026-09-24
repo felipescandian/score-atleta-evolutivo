@@ -206,9 +206,32 @@ function downloadAthletePdf(aid){
    </div>
  </section>`;
  document.title=`Evolutivo_Performance_${String(p.display||p.nome).replace(/[^A-Za-z0-9À-ÿ]+/g,'_')}_${date.replace(/\//g,'-')}`;
- setTimeout(()=>window.print(),220)
+ (async()=>{
+   try{
+     if(document.fonts&&document.fonts.ready)await document.fonts.ready;
+     const imgs=[...document.querySelectorAll('#printSheet img')];
+     await Promise.all(imgs.map(img=>new Promise(resolve=>{
+       if(img.complete&&img.naturalWidth){
+         if(typeof img.decode==='function')img.decode().catch(()=>{}).finally(resolve);
+         else resolve();
+         return;
+       }
+       const done=()=>resolve();
+       img.addEventListener('load',done,{once:true});
+       img.addEventListener('error',done,{once:true});
+       setTimeout(done,3000);
+     })));
+     await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
+     void $('printSheet').offsetHeight;
+     await new Promise(r=>setTimeout(r,/Android/i.test(navigator.userAgent)?900:250));
+   }catch(e){}
+   window.print();
+ })();
 }
-window.addEventListener('afterprint',()=>{document.title=oldTitle;$('printSheet').innerHTML=''})
+/* No Android, o evento afterprint pode disparar assim que a prévia abre.
+   Não apagamos o HTML do relatório aqui, porque isso pode deixar a prévia preta.
+   O conteúdo é substituído automaticamente na próxima geração. */
+window.addEventListener('afterprint',()=>{document.title=oldTitle})
 function updateClock(){if(!state)return;const start=state.started_at?new Date(state.started_at).getTime():Date.now(),end=state.status==='live'?Date.now():(state.ended_at?new Date(state.ended_at).getTime():Date.now());$('timer').textContent='⏱ '+fmtTime(Math.max(0,end-start))}
 if(!SID||!KEY||!API){showError('Este link está incompleto. Peça ao professor para gerar um novo link pelo Evolutivo Score.');return}request();pollTimer=setInterval(request,5000);clockTimer=setInterval(updateClock,1000);
 })();
