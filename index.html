@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Score Atleta Evolutivo V18.7 — alerta amarelo persistente + feedback PDF premium</title>
+<title>Score Personal Evolutivo V19 — transmissão automática e reconexão</title>
 <style>
 :root{--bg:#06111f;--card:#111f33;--card2:#172842;--line:rgba(255,255,255,.12);--txt:#f8fafc;--muted:#9fb0c8;--g:#18b66f;--b:#3b82f6;--p:#8b5cf6;--r:#ef4444;--y:#f59e0b}
 *{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top,#172554,#06111f 42%,#020617);color:var(--txt);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;max-width:850px;margin-inline:auto;padding:10px 10px 88px;user-select:none;-webkit-tap-highlight-color:transparent}
@@ -179,30 +179,35 @@ body.pocketLocked{overflow:hidden;overscroll-behavior:none}
 .personalEvalActions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.personalEvalActions button{min-height:50px}
 @media(max-width:560px){.personalNoteButtons{gap:3px}.personalNoteBtn{font-size:10px;min-height:32px}.personalEvalActions{grid-template-columns:1fr}}
 
+/* V19: interface exclusiva do Personal, sem apagar histórico e configurações antigas. */
+.schoolLegacy{display:none!important}
+#home #personalSetupWrap{display:block}
+#personalLivePanel .personalLiveHead h2{color:#7dd3fc}
+#personalLiveStatus{line-height:1.45;margin-top:5px}
 </style>
 </head>
 <body>
-<header class="top"><div><h1>Score Atleta Evolutivo <span style="font-size:11px;color:#f59e0b;vertical-align:middle">V18.7</span></h1><div id="sub" class="small">CTP • CTD • conduta • acompanhamento por evidências</div></div><button class="btn" id="gear">⚙️</button></header>
+<header class="top"><div><h1>Score Personal Evolutivo <span style="font-size:11px;color:#f59e0b;vertical-align:middle">V19.0</span></h1><div id="sub" class="small">Personal · CTP na ação · CTD na reflexão</div></div><button class="btn" id="gear">⚙️</button></header>
 
 <section id="home" class="screen on">
-<div class="panel">
+<div class="panel schoolLegacy">
  <div class="flex between"><div><h2>🔄 Central Evolutivo</h2><div id="syncStatus" class="small">Cadastro ainda não sincronizado com a planilha.</div><div id="pendingHomeStatus" class="small" style="margin-top:4px;color:#d9c38d">Histórico: nenhum treino pendente.</div></div><button id="syncNow" class="btn good">Atualizar atletas</button></div>
  <div class="small" style="margin-top:8px">Busca ID permanente, nome, horário e status diretamente da Central. Ao finalizar um treino da Escolinha, o histórico é enviado automaticamente. Se faltar internet, ele fica pendente neste aparelho.</div><button id="syncPendingHome" class="btn ghost" style="width:100%;margin-top:9px">☁️ Sincronizar treinos pendentes</button>
 </div>
 <div class="panel">
  <div class="row two"><div><label>Data</label><input id="date" type="date"></div><div><label>Treinador</label><input id="coach" placeholder="Ex.: Felipe"></div></div>
- <div class="row two"><div><label>Modo de uso</label><select id="useMode"><option value="central" selected>Evolutivo Esportes (Escola)</option><option value="personal">Evolutivo Performance (Personal)</option></select></div><div><label>Grade</label><select id="cols"><option>2</option><option selected>3</option><option>4</option><option>5</option></select></div></div>
+ <div class="row two"><div class="schoolLegacy"><label>Modo de uso</label><select id="useMode"><option value="personal" selected>Evolutivo Performance (Personal)</option></select></div><div><label>Grade</label><select id="cols"><option>2</option><option selected>3</option><option>4</option><option>5</option></select></div></div>
  <div id="personalSetupWrap" class="personalSetup">
    <div><b>⚡ Evolutivo Performance</b><div class="small" style="margin-top:4px">Monte o treino do Personal. O placar começa zerado e o mesmo link acompanha ao vivo e, ao final, recebe o feedback com os cinco pilares.</div></div>
    <label class="checkLine" style="margin-top:8px"><input id="includeCoachPersonal" type="checkbox" checked> Incluir o professor como participante do desafio</label>
    <div class="small">Com 1 atleta: perguntas CTD são diretas. Com 2 ou mais atletas: as perguntas são automaticamente para todos.</div>
  </div>
- <div id="centralClassWrap" class="row"><div><label>Turma / horário</label><select id="classSel"></select></div></div>
+ <div id="centralClassWrap" class="row schoolLegacy"><div><label>Turma / horário</label><select id="classSel"></select></div></div>
   <div class="row two"><div><label>Tema do treino</label><input id="theme" placeholder="Ex.: Passe entre linhas"></div><div><label>Treino da semana</label><select id="trainingNo"><option value="1" selected>Treino 1</option><option value="2">Treino 2</option><option value="3">Treino 3</option><option value="4">Treino 4</option></select></div></div>
  <div class="row"><div><label>Objetivo do treino / diagnóstico do treinador</label><textarea id="obs" placeholder="Opcional. Ex.: melhorar leitura do espaço entre linhas."></textarea></div></div>
  <button id="goCall" class="btn primary" style="width:100%">Preparar chamada</button>
 </div>
-<div class="panel"><div class="flex between"><h2>Cadastro</h2><span class="pill" id="cadResumo">0 atletas</span></div><div id="classesResumo"></div></div>
+<div class="panel schoolLegacy"><div class="flex between"><h2>Cadastro</h2><span class="pill" id="cadResumo">0 atletas</span></div><div id="classesResumo"></div></div>
 </section>
 
 <section id="call" class="screen">
@@ -315,7 +320,7 @@ body.pocketLocked{overflow:hidden;overscroll-behavior:none}
 
 <script>
 const KEY="score_atleta_evolutivo_v2_persistente";
-const APP_VERSION="18.4";
+const APP_VERSION="19.0";
 const $=id=>document.getElementById(id);
 let data=load(), current=null;
 let voiceRecognition=null, voiceActive=false, voiceStarting=false, voiceRestartTimer=null, wakeLock=null, voiceRecent=[], collectiveTimer=null, lastVoiceRaw="", lastVoiceAt=0;
@@ -451,7 +456,7 @@ function renderPersonalLivePanel(){
  let link=personalLiveViewerUrl();if($('personalLiveLink'))$('personalLiveLink').value=link;
  let mode=personalQuestionMode(),n=personalStudents().length;
  if($('personalQuestionRule'))$('personalQuestionRule').innerHTML=mode==='direct'?`<b>🧠 Perguntas diretas</b> · ${n} atleta no Personal. Cada +3 registra uma resposta correta dirigida a ele.`:`<b>🧠 Pergunta para todos</b> · ${n} atletas no Personal. Cada +3 registra quem respondeu corretamente.`;
- setPersonalLiveStatus(current.personalLive.lastOk?'Link ativo e placar sincronizado com a Central.':'Link gerado. Sincronizando com a Central…',!!current.personalLive.lastOk);
+ setPersonalLiveStatus(current.personalLive.pending?'Atualização pendente. Tentaremos novamente automaticamente; confira a conexão e a Central.':current.personalLive.lastOk?'Link ativo e placar sincronizado com a Central.':'Link gerado. Sincronizando com a Central…',!!current.personalLive.lastOk&&!current.personalLive.pending);
 }
 async function syncPersonalLiveNow(force=false,statusOverride){
  if(!current||current.mode!=='personal'||!current.personalLive)return{ok:false,skipped:true};
@@ -459,32 +464,32 @@ async function syncPersonalLiveNow(force=false,statusOverride){
  personalLiveSyncing=true;personalLiveSyncQueued=false;
  try{
    let payload=personalLivePayload(statusOverride);let out=await personalLivePostVerified(payload);
-   current.personalLive.lastOk=new Date().toISOString();current.personalLive.lastError='';current.personalLive.status=statusOverride||current.personalLive.status||'live';renderPersonalLivePanel();return{ok:true,out};
+   current.personalLive.lastOk=new Date().toISOString();current.personalLive.lastError='';current.personalLive.pending=false;current.personalLive.status=statusOverride||current.personalLive.status||'live';renderPersonalLivePanel();return{ok:true,out};
  }catch(e){
-   current.personalLive.lastError=e?.message||String(e);setPersonalLiveStatus('Link criado, mas a atualização ao vivo está sem conexão: '+current.personalLive.lastError,false);return{ok:false,error:current.personalLive.lastError};
+   current.personalLive.lastError=e?.message||String(e);current.personalLive.pending=true;setPersonalLiveStatus('Link criado, mas a atualização ao vivo está sem conexão: '+current.personalLive.lastError,false);return{ok:false,error:current.personalLive.lastError};
  }finally{
-   personalLiveSyncing=false;if(personalLiveSyncQueued&&current?.status==='running')schedulePersonalLiveSync(250);
+   personalLiveSyncing=false;if(current?.mode==='personal'&&current?.status==='running'&&current?.personalLive){if(personalLiveSyncQueued)schedulePersonalLiveSync(400);else if(current.personalLive.pending)schedulePersonalLiveSync(15000)}
  }
 }
 function schedulePersonalLiveSync(delay=250){
  if(!current||current.mode!=='personal'||!current.personalLive||current.status!=='running')return;
- clearTimeout(personalLiveSyncTimer);personalLiveSyncTimer=setTimeout(()=>syncPersonalLiveNow(false),delay);
+ current.personalLive.pending=true;renderPersonalLivePanel();clearTimeout(personalLiveSyncTimer);personalLiveSyncTimer=setTimeout(()=>syncPersonalLiveNow(false),delay);
 }
 async function initPersonalLiveSession(){
  if(!current||current.mode!=='personal')return;
- if(!current.personalLive)current.personalLive={sessionId:'PL-'+Date.now().toString(36).toUpperCase()+'-'+secureToken(4).toUpperCase(),viewKey:secureToken(20),status:'live',lastOk:'',lastError:''};
+ if(!current.personalLive)current.personalLive={sessionId:'PL-'+Date.now().toString(36).toUpperCase()+'-'+secureToken(4).toUpperCase(),viewKey:secureToken(20),status:'live',lastOk:'',lastError:'',pending:true};
  current.personalLive.status='live';renderPersonalLivePanel();await syncPersonalLiveNow(true,'live');renderPersonalLivePanel();
 }
 async function sharePersonalLive(){
  let link=personalLiveViewerUrl();if(!link)return alert('O link ainda não foi gerado.');
- if(!current?.personalLive?.lastOk)return alert('A Central ainda não confirmou a sessão ao vivo. Aguarde aparecer “Link ativo e placar sincronizado com a Central” antes de enviar para a família.');
+ if(!current?.personalLive?.lastOk||current.personalLive.pending)return alert('A Central ainda não confirmou a sessão ao vivo. Aguarde aparecer “Link ativo e placar sincronizado com a Central” antes de enviar para a família.');
  let title=`Personal ao vivo${current?.theme?' · '+current.theme:''}`;
  try{if(navigator.share){await navigator.share({title,text:'Acompanhe o desafio do Personal ao vivo:',url:link});return}}catch(e){if(e?.name==='AbortError')return}
  try{await navigator.clipboard.writeText(link);alert('Link do Personal copiado. Agora é só enviar para a família.')}catch(e){prompt('Copie o link do Personal:',link)}
 }
 async function copyPersonalLive(){
  let link=personalLiveViewerUrl();if(!link)return alert('O link ainda não foi gerado.');
- if(!current?.personalLive?.lastOk)return alert('A Central ainda não confirmou a sessão ao vivo. Aguarde aparecer “Link ativo e placar sincronizado com a Central” antes de copiar o link.');
+ if(!current?.personalLive?.lastOk||current.personalLive.pending)return alert('A Central ainda não confirmou a sessão ao vivo. Aguarde aparecer “Link ativo e placar sincronizado com a Central” antes de copiar o link.');
  try{await navigator.clipboard.writeText(link);alert('Link copiado.')}catch(e){prompt('Copie o link:',link)}
 }
 
@@ -510,7 +515,7 @@ function split(n){let p=String(n||"").trim().split(/\s+/).filter(Boolean);return
 function display(a,ctx){let sp=split(a.name),f=sp.f;if(!f)return"Sem nome";let same=ctx.filter(x=>norm(split(x.name).f)==norm(f));if(same.length<=1)return f;if(!sp.r.length)return a.name;let ini=sp.r[0][0].toUpperCase(),sameIni=same.filter(x=>(split(x.name).r[0]||"")[0]?.toUpperCase()==ini);return sameIni.length<=1?`${f} ${ini}.`:`${f} ${sp.r[0]}`}
 function active(cls){return data.athletes.filter(a=>a.className==cls&&a.active!==false).sort((a,b)=>a.name.localeCompare(b.name,"pt-BR"))}
 function all(cls){return data.athletes.filter(a=>a.className==cls).sort((a,b)=>a.name.localeCompare(b.name,"pt-BR"))}
-function show(s){document.querySelectorAll(".screen").forEach(x=>x.classList.remove("on"));$(s).classList.add("on");document.querySelectorAll(".nav button").forEach(b=>b.classList.toggle("on",b.dataset.s==s));$("sub").textContent={home:"CTP • CTD • conduta • acompanhamento por evidências",call:"Marque presença e falta",score:"CTP na ação • CTD na reflexão",report:"Evidências observadas no treino",voiceNames:"Apelidos de voz",settings:"Turmas e atletas fixos"}[s]||"";if(s=="score")renderScore();if(s=="report")renderReport()}
+function show(s){document.querySelectorAll(".screen").forEach(x=>x.classList.remove("on"));$(s).classList.add("on");document.querySelectorAll(".nav button").forEach(b=>b.classList.toggle("on",b.dataset.s==s));$("sub").textContent={home:"Personal · CTP na ação · CTD na reflexão",call:"Marque presença e falta",score:"CTP na ação • CTD na reflexão",report:"Evidências observadas no treino",voiceNames:"Apelidos de voz",settings:"Turmas e atletas fixos"}[s]||"";if(s=="score")renderScore();if(s=="report")renderReport()}
 function renderSelects(){let opts=data.classes.length?data.classes.map(c=>`<option>${esc(c)}</option>`).join(""):'<option value="">Nenhuma turma</option>';["classSel","addClassSel","filterClass","editClass"].forEach(i=>{let e=$(i),v=e.value;e.innerHTML=opts;if(data.classes.includes(v))e.value=v})}
 function renderHome(){let total=data.athletes.filter(a=>a.active!==false).length;$("cadResumo").textContent=total+" atletas ativos";$("classesResumo").innerHTML=data.classes.map(c=>{let n=active(c).length,off=data.athletes.filter(a=>a.className==c&&a.active===false).length;return `<div class=listRow><div class=rank>•</div><div><b>${esc(c)}</b><div class=small>${n} ativos ${off?`· ${off} inativos`:""}</div></div><span class=pill>${n}</span></div>`}).join("")||"<div class=empty>Nenhuma turma.</div>"}
 function renderManage(){ $("classManage").innerHTML=data.classes.map(c=>{let qtd=data.athletes.filter(a=>a.className==c).length;return `<div class=listRow><div class=rank>•</div><div><b>${esc(c)}</b><div class=small>${qtd} atletas</div></div><div class=flex><button class=smallBtn data-ec="${esc(c)}">Editar</button><button class=smallBtn data-dc="${esc(c)}" style="color:#fecaca;border-color:rgba(239,68,68,.38)">Excluir</button></div></div>`}).join("")||"<div class=empty>Nenhuma turma cadastrada.</div>";
@@ -525,11 +530,11 @@ document.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{let a=data.ath
 function renderAll(){renderSelects();renderHome();renderManage();renderCentralStatus();if(current){renderCall();renderScore();if(current.status==='running'){ensureTrainingFlow();renderTrainingFlow()}}}
 function addNames(cls,text){let names=text.split(/\n|,/).map(x=>x.trim()).filter(Boolean);if(!cls)return alert("Escolha a turma.");if(!names.length)return alert("Digite nomes.");let add=0,dup=0;names.forEach(n=>{if(data.athletes.some(a=>a.className==cls&&norm(a.name)==norm(n))){dup++;return}data.athletes.push({id:id(),name:n,className:cls,active:true,voiceAlias:'',source:'local',created_at:new Date().toISOString()});add++});save();alert(add+" adicionados"+(dup?` · ${dup} duplicados ignorados`:""))}
 function currentMode(){return current?.mode||($('useMode')?.value||'central')}
-function sessionRoster(){if(!current)return[];let base=current.mode==='personal'?[]:active(current.className),temp=Array.isArray(current.tempAthletes)?current.tempAthletes:[];return [...base,...temp].sort((a,b)=>a.name.localeCompare(b.name,'pt-BR'))}
+function sessionRoster(){if(!current)return[];let base=current.mode==='personal'?active('Personal'):active(current.className),temp=Array.isArray(current.tempAthletes)?current.tempAthletes:[];return [...base,...temp].sort((a,b)=>a.name.localeCompare(b.name,'pt-BR'))}
 function findSessionAthlete(aid){return sessionRoster().find(a=>a.id==aid)||data.athletes.find(a=>a.id==aid)||null}
 function addTemporaryAthlete(name,{present=true,late=false,role='atleta'}={}){if(!current)return null;name=String(name||'').trim();if(!name)return null;current.tempAthletes=current.tempAthletes||[];let existing=sessionRoster().find(a=>norm(a.name)==norm(name));if(existing){if(present)current.present[existing.id]=true;if(!current.scores[existing.id])current.scores[existing.id]={one:0,three:0,minus:0};return existing}let a={id:'TMP-'+Date.now().toString(36).toUpperCase()+'-'+Math.floor(Math.random()*9999),name,className:current.className,active:true,source:current.mode==='personal'?(role==='professor'?'personal_professor':'personal_avulso'):'temporario_treino',role,voiceAlias:'',created_at:new Date().toISOString()};current.tempAthletes.push(a);current.present[a.id]=!!present;current.scores[a.id]={one:0,three:0,minus:0};if(late){current.events.push({id:'EV-'+Date.now().toString(36).toUpperCase(),athlete_id:a.id,type:'late_arrival',value:0,at:new Date().toISOString(),from_voice:false,raw:'atleta temporário chegou atrasado'})}return a}
-function start(){if(current&&current.status==='running')return alert('Já existe um treino em andamento. Finalize ou descarte o treino atual antes de preparar outro.');let mode=$('useMode')?.value||'central',cls=mode==='personal'?'Evolutivo Performance':$('classSel').value,arr=mode==='personal'?[]:active(cls),theme=$('theme').value.trim(),coach=$('coach').value.trim();if(!theme)return alert('Preencha o tema.');if(mode==='central'&&!arr.length){alert('Não há atletas ativos nessa turma. Atualize a Central ou escolha o modo Personal / Avulso.');return}current={id:'TREINO-'+Date.now().toString(36).toUpperCase(),date:$('date').value||today(),coach,className:cls,theme,mode,trainingNo:+($('trainingNo').value||1),obs:$('obs').value.trim(),present:{},scores:{},events:[],voiceAliases:{},tempAthletes:[],pedagogy:{collectiveReflections:[],ctdAttempts:[]},actions:[],activeReflectionId:null,status:'call',startedAt:null,endedAt:null,stage:null,stageStartedAt:null,stageHistory:[],activityGroups:null,activityBlock:0,voicePending:[],goals:{},personalLive:null,personalEvaluations:{}};arr.forEach(a=>{current.present[a.id]=true;current.scores[a.id]={one:0,three:0,minus:0}});if(mode==='personal'&&$('includeCoachPersonal')?.checked){let prof=coach?`Professor ${coach.split(/\s+/)[0]}`:'Professor';addTemporaryAthlete(prof,{present:true,role:'professor'})}renderCall();show('call');if(mode==='personal')alert('Evolutivo Performance: adicione os atletas com “+ atleta”. Ao tocar em “Iniciar treino”, o link para a família será criado automaticamente e continuará válido para o resultado final.')}
-function renderCall(){if(!current){$('attGrid').innerHTML='<div class=empty>Prepare um treino.</div>';return}let arr=sessionRoster();arr.forEach(a=>{if(!(a.id in current.present))current.present[a.id]=true;if(!current.scores[a.id])current.scores[a.id]={one:0,three:0,minus:0};else if(current.scores[a.id].minus==null)current.scores[a.id].minus=0});let p=arr.filter(a=>current.present[a.id]).length;$('callInfo').textContent=current.className+' · '+current.theme+(current.mode==='personal'?' · Personal':'');$('presentPill').textContent=p+' presentes';if($('goScore'))$('goScore').textContent=current.status==='running'?'↩ Voltar ao treino':'▶ Iniciar treino';$('attGrid').innerHTML=arr.map(a=>`<button class="att ${current.present[a.id]?'ok':''}" data-pr="${a.id}"><b>${esc(display(a,arr))}</b><span>${esc(a.name)} · ${current.present[a.id]?'presente':'faltou'}${isProfessorParticipant(a)?' · professor':a.source==='personal_avulso'||a.source==='temporario_treino'?' · temporário':''}</span></button>`).join('')||'<div class=empty>Nenhum atleta na chamada. Use “+ atleta” para adicionar.</div>';document.querySelectorAll('[data-pr]').forEach(b=>b.onclick=()=>{current.present[b.dataset.pr]=!current.present[b.dataset.pr];renderCall()})}
+function start(){if(current&&current.status==='running')return alert('Já existe um treino em andamento. Finalize ou descarte o treino atual antes de preparar outro.');let mode=$('useMode')?.value||'central',cls=mode==='personal'?'Evolutivo Performance':$('classSel').value,arr=mode==='personal'?active('Personal'):active(cls),theme=$('theme').value.trim(),coach=$('coach').value.trim();if(!theme)return alert('Preencha o tema.');if(mode==='central'&&!arr.length){alert('Não há atletas ativos nessa turma. Atualize a Central ou escolha o modo Personal / Avulso.');return}current={id:'TREINO-'+Date.now().toString(36).toUpperCase(),date:$('date').value||today(),coach,className:cls,theme,mode,trainingNo:+($('trainingNo').value||1),obs:$('obs').value.trim(),present:{},scores:{},events:[],voiceAliases:{},tempAthletes:[],pedagogy:{collectiveReflections:[],ctdAttempts:[]},actions:[],activeReflectionId:null,status:'call',startedAt:null,endedAt:null,stage:null,stageStartedAt:null,stageHistory:[],activityGroups:null,activityBlock:0,voicePending:[],goals:{},personalLive:null,personalEvaluations:{}};arr.forEach(a=>{current.present[a.id]=mode==='personal'?false:true;current.scores[a.id]={one:0,three:0,minus:0}});if(mode==='personal'&&$('includeCoachPersonal')?.checked){let prof=coach?`Professor ${coach.split(/\s+/)[0]}`:'Professor';addTemporaryAthlete(prof,{present:true,role:'professor'})}renderCall();show('call');}
+function renderCall(){if(!current){$('attGrid').innerHTML='<div class=empty>Prepare um personal.</div>';return}let arr=sessionRoster();arr.forEach(a=>{if(!(a.id in current.present))current.present[a.id]=current.mode==='personal'?false:true;if(!current.scores[a.id])current.scores[a.id]={one:0,three:0,minus:0};else if(current.scores[a.id].minus==null)current.scores[a.id].minus=0});let p=arr.filter(a=>current.present[a.id]).length;$('callInfo').textContent=current.className+' · '+current.theme+(current.mode==='personal'?' · Personal':'');$('presentPill').textContent=p+' presentes';if($('goScore'))$('goScore').textContent=current.status==='running'?'↩ Voltar ao treino':'▶ Iniciar treino';$('attGrid').innerHTML=arr.map(a=>`<button class="att ${current.present[a.id]?'ok':''}" data-pr="${a.id}"><b>${esc(display(a,arr))}</b><span>${esc(a.name)} · ${current.present[a.id]?'presente':'faltou'}${isProfessorParticipant(a)?' · professor':a.source==='personal_avulso'||a.source==='temporario_treino'?' · temporário':''}</span></button>`).join('')||'<div class=empty>Nenhum atleta na chamada. Use “+ atleta” para adicionar.</div>';document.querySelectorAll('[data-pr]').forEach(b=>b.onclick=()=>{current.present[b.dataset.pr]=!current.present[b.dataset.pr];renderCall()})}
 function present(){if(!current)return[];return sessionRoster().filter(a=>current.present[a.id])}
 function firstName(a){return split(a?.name).f||''}
 function voiceName(a,aliases=current?.voiceAliases||{}){return aliases[a.id]||a.voiceAlias||firstName(a)}
@@ -1082,10 +1087,11 @@ $("json").onclick=()=>{if(!current)return;down(exportObj(),`${current.date}_${sl
 $("exportCad").onclick=()=>down({schema_version:"cadastro_score_atleta_v3",exported_at:new Date().toISOString(),centralSync:data.centralSync||{},classes:data.classes,athletes:data.athletes},"cadastro-atletas-evolutivo.json");
 $("importCad").onchange=async e=>{let f=e.target.files[0];if(!f)return;try{let o=JSON.parse(await f.text());if(!o.classes||!o.athletes)throw Error();if(confirm("Importar cadastro e substituir o atual deste aparelho?")){data={classes:o.classes,athletes:o.athletes,sessions:Array.isArray(data.sessions)?data.sessions:[],centralSync:o.centralSync||data.centralSync||{},pendingTrainingSync:Array.isArray(data.pendingTrainingSync)?data.pendingTrainingSync:[]};save();alert("Cadastro importado. O histórico de treinos deste aparelho foi preservado.")}}catch(err){alert("Arquivo inválido.")}e.target.value=""};
 $("reset").onclick=()=>{if(confirm("Apagar cadastro salvo neste aparelho?")){localStorage.removeItem(KEY);data=load();current=null;renderAll();show("home")}};
-if($("useMode"))$("useMode").dispatchEvent(new Event("change"));
+if($("useMode")){$("useMode").value="personal";$("useMode").dispatchEvent(new Event("change"));}
 renderAll();
 refreshMicEnvironment();
 setPocketUI();
 window.addEventListener('online',()=>{if(pendingTrainingQueue().length)syncPendingTrainings(false);if(current?.mode==='personal'&&current?.status==='running'&&current.personalLive)schedulePersonalLiveSync(250)});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&current?.mode==='personal'&&current?.status==='running'&&current.personalLive)schedulePersonalLiveSync(400)});
 setTimeout(()=>{if(navigator.onLine&&pendingTrainingQueue().length)syncPendingTrainings(false)},1200);
 </script></body></html>
