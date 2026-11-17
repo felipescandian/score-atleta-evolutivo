@@ -185,11 +185,11 @@ body.pocketLocked{overflow:hidden;overscroll-behavior:none}
 #personalLivePanel .personalLiveHead h2{color:#7dd3fc}
 #personalLiveStatus{line-height:1.45;margin-top:5px}
 </style>
-</head>
+<style>.evpManagementSettings>summary{cursor:pointer;font-size:17px;font-weight:800;color:#e4c573;padding:6px 0}.evpManageToolbar{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.evpManageCard{border:1px solid #4a4230;background:#101318;border-radius:14px;padding:16px;margin-top:12px}.evpManageStats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:16px 0}.evpManageStats div{border-radius:10px;padding:10px 4px;text-align:center;background:#1b2027}.evpManageStats b{display:block;font-size:23px;color:#e4c573}.evpManageStats small{font-size:11px;color:#b1bac8}.evpSeedTable{width:100%;border-collapse:collapse;font-size:12px;margin:12px 0}.evpSeedTable td,.evpSeedTable th{padding:8px 5px;text-align:left;border-bottom:1px solid #303741}.evpSeedTable td:nth-child(n+2),.evpSeedTable th:nth-child(n+2){text-align:center}.evpManageNote{color:#f3ca80;font-size:13px}.evpManageActions{display:flex;flex-wrap:wrap;gap:8px}.evpManageActions button{flex:1;min-width:105px}</style></head>
 <body>
 <header class="top"><div><h1>Score Personal Evolutivo <span style="font-size:11px;color:#f59e0b;vertical-align:middle">V19.0</span></h1><div id="sub" class="small">Personal · CTP na ação · CTD na reflexão</div></div><button class="btn" id="gear">⚙️</button></header>
 
-<section id="home" class="screen on"><div class="panel" id="evpPackageManager"></div>
+<section id="home" class="screen on">
 <div class="panel schoolLegacy">
  <div class="flex between"><div><h2>🔄 Central Evolutivo</h2><div id="syncStatus" class="small">Cadastro ainda não sincronizado com a planilha.</div><div id="pendingHomeStatus" class="small" style="margin-top:4px;color:#d9c38d">Histórico: nenhum treino pendente.</div></div><button id="syncNow" class="btn good">Atualizar atletas</button></div>
  <div class="small" style="margin-top:8px">Busca ID permanente, nome, horário e status diretamente da Central. Ao finalizar um treino da Escolinha, o histórico é enviado automaticamente. Se faltar internet, ele fica pendente neste aparelho.</div><button id="syncPendingHome" class="btn ghost" style="width:100%;margin-top:9px">☁️ Sincronizar treinos pendentes</button>
@@ -294,10 +294,11 @@ body.pocketLocked{overflow:hidden;overscroll-behavior:none}
 
 <section id="settings" class="screen">
 <div class="panel"><h2>Configurações</h2><div class="small">A Central Evolutivo é a fonte oficial do cadastro. A lista sincronizada também fica salva neste aparelho, permitindo continuar usando o app sem internet depois de uma sincronização bem-sucedida.</div></div>
+<details class="panel evpManagementSettings" id="evpManagementSettings"><summary>Gerenciar atletas, pacotes e aulas</summary><div id="evpPackageManager" style="margin-top:16px"></div></details>
 <div class="panel"><h2>🔗 Integração com a Central Evolutivo</h2><label>URL do Web App do Apps Script</label><input id="centralUrl" inputmode="url" autocomplete="off" placeholder="https://script.google.com/macros/s/.../exec"><label style="margin-top:10px">Token de acesso do app</label><input id="centralToken" type="password" autocomplete="off" placeholder="Cole o token gerado no Apps Script"><div class="flex" style="margin-top:10px"><button id="saveCentral" class="btn primary">Salvar conexão</button><button id="syncCentral" class="btn good">Atualizar atletas agora</button></div><button id="syncPending" class="btn ghost" style="width:100%;margin-top:10px">☁️ Sincronizar treinos pendentes</button><div id="centralStatus" class="small" style="margin-top:9px">Configure a URL e o token uma única vez neste aparelho.</div><div id="pendingSettingsStatus" class="small" style="margin-top:5px;color:#d9c38d">Histórico: nenhum treino pendente.</div></div>
-<div class="panel"><h2>Turmas locais</h2><div class="small" style="margin-bottom:10px">Use esta área apenas como contingência. Na próxima sincronização, a Central volta a ser a referência oficial.</div><div class="flex"><input id="newClass" placeholder="Ex.: Sub-10"><button id="addClass" class="btn good">Adicionar</button></div><div id="classManage"></div></div>
-<div class="panel"><h2>Adicionar atleta local</h2><div class="small" style="margin-bottom:10px">Atleta adicionado aqui recebe ID temporário ATL-. Para entrar no histórico mensal corretamente, cadastre-o também na Central para receber um EVE-XXX.</div><label>Turma</label><select id="addClassSel"></select><label style="margin-top:10px">Nomes completos</label><textarea id="names" placeholder="Um por linha. Ex.:&#10;Bruno Silva&#10;Bruno Pereira"></textarea><button id="addNames" class="btn good" style="width:100%;margin-top:10px">Adicionar</button></div>
-<div class="panel"><div class="flex between"><h2>Atletas</h2><select id="filterClass" style="max-width:180px"></select></div><div id="athManage"></div></div>
+<div class="panel schoolLegacy"><h2>Turmas locais</h2><div class="small" style="margin-bottom:10px">Use esta área apenas como contingência. Na próxima sincronização, a Central volta a ser a referência oficial.</div><div class="flex"><input id="newClass" placeholder="Ex.: Sub-10"><button id="addClass" class="btn good">Adicionar</button></div><div id="classManage"></div></div>
+<div class="panel schoolLegacy"><h2>Adicionar atleta local</h2><div class="small" style="margin-bottom:10px">Atleta adicionado aqui recebe ID temporário ATL-. Para entrar no histórico mensal corretamente, cadastre-o também na Central para receber um EVE-XXX.</div><label>Turma</label><select id="addClassSel"></select><label style="margin-top:10px">Nomes completos</label><textarea id="names" placeholder="Um por linha. Ex.:&#10;Bruno Silva&#10;Bruno Pereira"></textarea><button id="addNames" class="btn good" style="width:100%;margin-top:10px">Adicionar</button></div>
+<div class="panel schoolLegacy"><div class="flex between"><h2>Atletas</h2><select id="filterClass" style="max-width:180px"></select></div><div id="athManage"></div></div>
 <div class="panel"><h2>Backup</h2><div class="flex"><button id="exportCad" class="btn primary">Exportar cadastro</button><label class="btn ghost">Importar cadastro<input id="importCad" type="file" accept=".json,application/json" style="display:none"></label></div></div>
 <div class="panel"><button id="reset" class="btn danger" style="width:100%">Limpar cadastro deste aparelho</button></div>
 </section>
@@ -320,7 +321,7 @@ body.pocketLocked{overflow:hidden;overscroll-behavior:none}
 
 <script>
 const KEY="score_atleta_evolutivo_v2_persistente";
-const APP_VERSION="20.0";
+const APP_VERSION="20.1";
 const $=id=>document.getElementById(id);
 let data=load(), current=null;
 let voiceRecognition=null, voiceActive=false, voiceStarting=false, voiceRestartTimer=null, wakeLock=null, voiceRecent=[], collectiveTimer=null, lastVoiceRaw="", lastVoiceAt=0;
@@ -532,8 +533,9 @@ function renderAll(){renderSelects();renderHome();renderManage();renderCentralSt
 function addNames(cls,text){let names=text.split(/\n|,/).map(x=>x.trim()).filter(Boolean);if(!cls)return alert("Escolha a turma.");if(!names.length)return alert("Digite nomes.");let add=0,dup=0;names.forEach(n=>{if(data.athletes.some(a=>a.className==cls&&norm(a.name)==norm(n))){dup++;return}data.athletes.push({id:id(),name:n,className:cls,active:true,voiceAlias:'',source:'local',created_at:new Date().toISOString()});add++});save();alert(add+" adicionados"+(dup?` · ${dup} duplicados ignorados`:""))}
 
 
+const EVP_SALDOS_INFORMADOS=[{"nome": "Cesar Ferrari", "aliases": ["Cesar Ferrari", "César Ferrari"], "contratadas": 4, "restantes": 1}, {"nome": "Miguel România", "aliases": ["Miguel România", "Miguel Romania"], "contratadas": 4, "restantes": 4}, {"nome": "Murilo Prado", "aliases": ["Murilo Prado"], "contratadas": 4, "restantes": 4}, {"nome": "Rian Luca", "aliases": ["Rian Luca", "Ryan Lucca", "Ryan Luca", "Rian Lucca"], "contratadas": 4, "restantes": 3}, {"nome": "Gabizinha", "aliases": ["Gabizinha", "Gabriela"], "contratadas": 8, "restantes": 4}, {"nome": "Heitor Silva", "aliases": ["Heitor Silva"], "contratadas": 4, "restantes": 0}, {"nome": "Joaquim Silva", "aliases": ["Joaquim Silva"], "contratadas": 4, "restantes": 0}, {"nome": "Pierre Scandian", "aliases": ["Pierre Scandian"], "contratadas": 4, "restantes": 4}];
 // V20: saldo confirmado é sempre restaurado da Central, nunca recriado pelo navegador.
-let evpBalanceBusy=false,evpManageError='',evpManageBusy=false;
+let evpBalanceBusy=false,evpManageError='',evpManageBusy=false,evpSelectedAthlete='';
 function evpMonth(){return 'continuo'}
 function evpBalance(aid){return data.personalBalances?.controle==='pacote_continuo'?data.personalBalances.atletas.find(a=>String(a.id)===String(aid)):null}
 function evpBalanceText(aid){
@@ -569,9 +571,9 @@ function evpReadState(op_id=''){
 }
 function evpApplyState(out){
  if(out.saldo?.controle!=='pacote_continuo')throw Error('A Central ainda está no controle mensal. Instale o código novo.');
- data.personalBalances={...out.saldo,consultado_em:new Date().toISOString()};
+ data.personalBalances={...out.saldo,consultado_em:new Date().toISOString()};data.personalSetupApplied=out.lista_inicial_aplicada===true;data.personalFeatures=out.recursos||[];
  let old=new Map(data.athletes.map(a=>[String(a.id),a]));
- data.athletes=out.atletas.map(a=>({...old.get(String(a.id)),id:String(a.id),name:a.nome,className:'Personal',active:a.ativo!==false,source:'central_evolutivo'}));data.classes=['Personal'];
+ data.athletes=out.atletas.map(a=>({...old.get(String(a.id)),id:String(a.id),name:a.nome,nascimento:a.nascimento||'',className:'Personal',active:a.ativo!==false,source:'central_evolutivo'}));data.classes=['Personal'];
  localStorage.setItem(KEY,JSON.stringify(data));
 }
 async function evpRefreshBalances(){
@@ -582,12 +584,33 @@ async function evpRefreshBalances(){
 }
 function evpPendingOperation(){try{return JSON.parse(localStorage.getItem('evp_package_pending_v20')||'null')}catch(_){return null}}
 function evpRenderManager(){
- let el=$('evpPackageManager');if(!el)return;
- let arr=data.personalBalances?.controle==='pacote_continuo'?data.personalBalances.atletas:[],pending=evpPendingOperation();
- el.innerHTML=`<h2>Pacotes dos alunos</h2><div class="small">Saldo salvo na Central. Continua válido na virada do mês e após limpar os dados deste aparelho.</div><div class="flex" style="margin:10px 0"><button class="btn primary" id="evpRefreshAll" ${evpBalanceBusy?'disabled':''}>${evpBalanceBusy?'Consultando…':'Atualizar da Central'}</button><button class="btn good" id="evpNewAthlete">+ Cadastrar atleta</button></div>${data.personalBalances?.consultado_em?`<div class="small">Última consulta: ${esc(new Date(data.personalBalances.consultado_em).toLocaleString('pt-BR'))}</div>`:''}${evpManageError?`<div role="status" style="color:#fecaca;margin:8px 0">${esc(evpManageError)}</div>`:''}${pending?`<div style="padding:12px;border:1px solid #d6b13e">Operação aguardando confirmação. Confira antes de lançar outra.<button class="btn primary" id="evpRetryOperation">Confirmar / tentar novamente</button></div>`:''}<div>${arr.length?arr.map(a=>`<div style="padding:12px 0;border-bottom:1px solid #374151"><b>${esc(a.nome)}</b><div>${a.configurado?`${a.contratadas} contratadas · ${a.realizadas} realizadas · <b style="color:#f1cf78">${a.restantes} restantes</b>${a.excedentes?' · '+a.excedentes+' excedentes':''}`:'Configure o pacote e o saldo que faltam hoje.'}</div><div class="flex" style="margin-top:8px"><button class="smallBtn" data-package-id="${esc(a.id)}" data-kind="${a.configurado?'ajustar':'iniciar'}">${a.configurado?'Corrigir saldo':'Configurar saldo inicial'}</button>${a.configurado?`<button class="smallBtn" data-package-id="${esc(a.id)}" data-kind="renovar">Renovar / adicionar aulas</button>`:''}</div></div>`).join(''):'<div class="empty">Salve a conexão e toque em Atualizar da Central para carregar os atletas.</div>'}</div>`;
- $('evpRefreshAll').onclick=()=>evpRefreshBalances();$('evpNewAthlete').onclick=evpOpenAthlete;
+ const el=$('evpPackageManager');if(!el)return;
+ const arr=data.personalBalances?.controle==='pacote_continuo'?data.personalBalances.atletas:[],pending=evpPendingOperation();
+ if(!arr.some(a=>String(a.id)===evpSelectedAthlete))evpSelectedAthlete=arr[0]?String(arr[0].id):'';
+ const a=arr.find(a=>String(a.id)===evpSelectedAthlete),disabled=pending||evpManageBusy||evpBalanceBusy;
+ el.innerHTML=`<p class="small">Atualize o cadastro e escolha um atleta para editar. Os dados ficam salvos na Central.</p><div class="evpManageToolbar"><button class="smallBtn" id="evpRefreshAll" ${evpBalanceBusy?'disabled':''}>${evpBalanceBusy?'Consultando…':'Atualizar atletas e saldos'}</button><button class="smallBtn" id="evpNewAthlete" ${disabled?'disabled':''}>+ Novo atleta</button></div>${data.personalBalances?.consultado_em?`<div class="small">Consulta: ${esc(new Date(data.personalBalances.consultado_em).toLocaleString('pt-BR'))}</div>`:''}${evpManageError?`<p role="status" class="evpManageNote">${esc(evpManageError)}</p>`:''}${pending?`<div class="evpManageCard">Uma operação aguarda confirmação.<button class="btn primary" id="evpRetryOperation" ${evpManageBusy?'disabled':''}>Conferir / tentar novamente</button></div>`:''}${arr.length?`<label for="evpAthleteSelect" style="margin-top:16px">Selecionar atleta (${arr.length})</label><select id="evpAthleteSelect">${arr.map(x=>`<option value="${esc(x.id)}" ${String(x.id)===evpSelectedAthlete?'selected':''}>${esc(x.nome)}</option>`).join('')}</select>`:'<div class="empty">Salve a conexão e atualize os atletas para carregar os cadastros.</div>'}${a?`<div class="evpManageCard"><b>${esc(a.nome)}</b>${a.configurado?`<div class="evpManageStats"><div><b>${a.contratadas}</b><small>Contratadas</small></div><div><b>${a.realizadas}</b><small>Realizadas</small></div><div><b>${a.restantes}</b><small>Restantes</small></div></div>${a.restantes===0?'<p class="evpManageNote">Renovação pendente</p>':''}${a.excedentes?`<p class="evpManageNote">${a.excedentes} aula(s) excedente(s).</p>`:''}`:'<p class="small">Saldo inicial ainda não configurado.</p>'}<div class="evpManageActions"><button class="smallBtn" id="evpEditAthlete" ${disabled?'disabled':''}>Editar nome / nascimento</button><button class="smallBtn" id="evpEditBalance" ${disabled?'disabled':''}>${a.configurado?'Corrigir aulas':'Configurar pacote'}</button>${a.configurado?`<button class="smallBtn" id="evpRenewBalance" ${disabled?'disabled':''}>Renovar pacote</button>`:''}</div></div>`:''}${data.personalSetupApplied?'<p class="small" style="margin-top:16px">Lista de 17/11 já aplicada. O saldo segue os treinos e renovações desde então.</p>':`<details style="margin-top:18px"><summary style="cursor:pointer;color:#e4c573">Saldos informados em 17/11/2026</summary><table class="evpSeedTable"><thead><tr><th>Atleta</th><th>Pacote</th><th>Restantes</th></tr></thead><tbody>${EVP_SALDOS_INFORMADOS.map(x=>`<tr><td>${esc(x.nome)}</td><td>${x.contratadas}</td><td>${x.restantes}${x.restantes===0?' · renovar':''}</td></tr>`).join('')}</tbody></table><button class="btn primary" id="evpApplySeed" ${disabled?'disabled':''}>Aplicar nomes e saldos informados</button><p class="small">Aplicação única na Central. Não será repetida ao recarregar ou limpar o navegador.</p></details>`}`;
+ $('evpRefreshAll').onclick=()=>evpRefreshBalances();$('evpNewAthlete').onclick=()=>evpOpenAthlete();
  if($('evpRetryOperation'))$('evpRetryOperation').onclick=()=>evpSendOperation(evpPendingOperation());
- el.querySelectorAll('[data-package-id]').forEach(b=>{b.disabled=!!pending||evpManageBusy;b.onclick=()=>evpOpenPackage(b.dataset.packageId,b.dataset.kind)});
+ if($('evpAthleteSelect'))$('evpAthleteSelect').onchange=e=>{evpSelectedAthlete=e.target.value;evpRenderManager()};
+ if(a){$('evpEditAthlete').onclick=()=>evpOpenAthlete(a.id);$('evpEditBalance').onclick=()=>evpOpenPackage(a.id,a.configurado?'ajustar':'iniciar');if($('evpRenewBalance'))$('evpRenewBalance').onclick=()=>evpOpenPackage(a.id,'renovar')}
+ if($('evpApplySeed'))$('evpApplySeed').onclick=evpApplySeedList;
+}
+async function evpApplySeedList(){
+ if(evpPendingOperation())return alert('Confirme a operação pendente primeiro.');
+ if(evpPendingFinals().length)return alert('Sincronize os treinos pendentes antes de aplicar os saldos.');
+ if(!await evpRefreshBalances())return;
+ if(data.personalSetupApplied)return;
+ if(!data.personalFeatures?.includes('gestao_v201'))return alert('Atualize o Apps Script com o código V20.1 e publique uma nova versão da implantação.');
+ try{
+  const arr=data.personalBalances.atletas,used=new Set(),itens=EVP_SALDOS_INFORMADOS.map(x=>{
+   const candidates=arr.filter(a=>x.aliases.some(alias=>norm(alias)===norm(a.nome)));
+   if(candidates.length!==1)throw Error(candidates.length?'Mais de um cadastro corresponde a '+x.nome+'. Confira os nomes.':'Não encontrei '+x.nome+'. Cadastre o atleta e atualize a lista.');
+   const a=candidates[0];if(used.has(String(a.id)))throw Error('Há cadastros repetidos na lista.');used.add(String(a.id));
+   return{id:String(a.id),nome:x.nome,contratadas:x.contratadas,restantes:x.restantes,expected_event_id:a.event_id||'',expected_remaining:a.restantes,expected_excedentes:a.excedentes||0};
+  });
+  const item={action:'app_saldos_lista',payload:{op_id:'LISTA-20261117-V201',itens}};
+  localStorage.setItem('evp_package_pending_v20',JSON.stringify(item));await evpSendOperation(item);
+ }catch(e){evpManageError=e.message;evpRenderManager()}
 }
 function evpCloseEditor(){ $('evpEditor')?.remove() }
 function evpEditor(content){evpCloseEditor();let el=document.createElement('div');el.id='evpEditor';el.style.cssText='position:fixed;inset:0;background:#000c;z-index:15000;display:flex;align-items:center;justify-content:center;padding:16px';el.innerHTML=`<div class="panel" role="dialog" aria-modal="true" style="width:100%;max-width:480px;max-height:90vh;overflow:auto">${content}<div id="evpEditorError" role="status" style="color:#fecaca;margin:10px 0"></div><div class="flex" style="margin-top:12px"><button class="btn primary" id="evpEditorSave">Salvar na Central</button><button class="btn ghost" id="evpEditorCancel">Cancelar</button></div></div>`;document.body.appendChild(el);$('evpEditorCancel').onclick=evpCloseEditor;return el}
@@ -606,23 +629,29 @@ async function evpOpenPackage(aid,kind){
   localStorage.setItem('evp_package_pending_v20',JSON.stringify(item));evpCloseEditor();await evpSendOperation(item);
  };
 }
-function evpOpenAthlete(){
+function evpOpenAthlete(aid){
  if(evpPendingOperation())return alert('Confirme a operação pendente primeiro.');
- evpEditor('<h2>Cadastrar atleta na Central</h2><label>Nome completo</label><input id="evpAthName"><label>Data de nascimento</label><input id="evpAthBirth" type="date"><p class="small">O responsável acessará pelo link da live, sem cadastro ou senha.</p>');
- $('evpEditorSave').onclick=async()=>{let nome=$('evpAthName').value.trim();if(!nome)return $('evpEditorError').textContent='Informe o nome.';let item={action:'app_atleta',payload:{id:'EVP-'+secureToken(12),nome,nascimento:$('evpAthBirth').value}};localStorage.setItem('evp_package_pending_v20',JSON.stringify(item));evpCloseEditor();await evpSendOperation(item)};
+ const a=aid?data.athletes.find(x=>String(x.id)===String(aid)):null;
+ if(a&&!data.personalFeatures?.includes('gestao_v201'))return alert('Atualize o Apps Script para V20.1 antes de editar o cadastro.');
+ evpEditor(`<h2>${a?'Editar atleta':'Cadastrar atleta'}</h2><label>Nome completo</label><input id="evpAthName" value="${esc(a?.name||'')}"><label>Data de nascimento</label><input id="evpAthBirth" type="date" value="${esc(a?.nascimento||'')}"><p class="small">${a?'O ID e o histórico do atleta serão preservados.':'O responsável acompanha pelo link da live, sem senha.'}</p>`);
+ $('evpEditorSave').onclick=async()=>{const nome=$('evpAthName').value.trim();if(!nome)return $('evpEditorError').textContent='Informe o nome.';const item={action:'app_atleta',payload:{id:a?a.id:'EVP-'+secureToken(12),nome,nascimento:$('evpAthBirth').value,editar:!!a,expected_name:a?.name||''}};localStorage.setItem('evp_package_pending_v20',JSON.stringify(item));evpCloseEditor();await evpSendOperation(item)};
+}
+function evpOperationConfirmed(item,out){
+ if(item.action==='pacote_operacao'||item.action==='app_saldos_lista')return out.operacao_confirmada===true;
+ return out.atletas.some(a=>String(a.id)===String(item.payload.id)&&(!item.payload.editar||(String(a.nome)===item.payload.nome&&String(a.nascimento||'')===String(item.payload.nascimento||''))));
 }
 async function evpSendOperation(item){
  if(!item||evpManageBusy)return;evpManageBusy=true;evpManageError='Confirmando a operação na Central…';evpRenderManager();
  try{
-  const isPack=item.action==='pacote_operacao';
+  
   let out=await evpReadState(item.payload.op_id||'');
-  let confirmed=isPack?out.operacao_confirmada:out.atletas.some(a=>String(a.id)===item.payload.id);
+  let confirmed=evpOperationConfirmed(item,out);
   if(!confirmed){
    try{await trainingPostIframe(item.payload,item.action)}catch(e){
-    out=await evpReadState(item.payload.op_id||'');confirmed=isPack?out.operacao_confirmada:out.atletas.some(a=>String(a.id)===item.payload.id);
+    out=await evpReadState(item.payload.op_id||'');confirmed=evpOperationConfirmed(item,out);
     if(!confirmed){if(e.centralRejected){localStorage.removeItem('evp_package_pending_v20');evpApplyState(out);}throw e;}
    }
-   out=await evpReadState(item.payload.op_id||'');confirmed=isPack?out.operacao_confirmada:out.atletas.some(a=>String(a.id)===item.payload.id);
+   out=await evpReadState(item.payload.op_id||'');confirmed=evpOperationConfirmed(item,out);
   }
   if(!confirmed)throw Error('A Central ainda não confirmou. Use o botão para conferir / tentar novamente.');
   evpApplyState(out);localStorage.removeItem('evp_package_pending_v20');evpManageError='Salvo e confirmado na Central.';
