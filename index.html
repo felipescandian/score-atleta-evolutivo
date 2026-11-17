@@ -213,7 +213,7 @@ body.pocketLocked{overflow:hidden;overscroll-behavior:none}
 <section id="call" class="screen">
 <div class="panel"><div class="flex between"><div><h2>Chamada</h2><div id="callInfo" class="small">—</div></div><span id="presentPill" class="pill">0 presentes</span></div>
 <div class="flex"><button id="allPresent" class="btn good">Todos presentes</button><button id="allAbsent" class="btn ghost">Todos faltaram</button><button id="quickAdd" class="btn warn">+ atleta</button></div></div>
-<div id="attGrid" class="attGrid"></div>
+<div id="evpBalanceCall" class="panel" style="display:none"></div><div id="attGrid" class="attGrid"></div>
 <div class="panel"><button id="goScore" class="btn primary" style="width:100%">▶ Iniciar treino</button><div class="small" style="margin-top:8px;text-align:center">Antes de iniciar, o app pedirá confirmação da chamada.</div></div>
 </section>
 
@@ -229,7 +229,7 @@ body.pocketLocked{overflow:hidden;overscroll-behavior:none}
  <div class="stats"><div class="stat"><b id="stPres">0</b><span>presentes</span></div><div class="stat"><b id="stTotal">0</b><span id="stTotalLabel">pontos</span></div><div class="stat"><b id="stOne">0</b><span id="stOneLabel">CTP +1</span></div><div class="stat"><b id="stThree">0</b><span id="stThreeLabel">CTD +3</span></div><div class="stat"><b id="stGoals">0</b><span>⚽ gols</span></div></div>
  <div class="flex" style="margin-top:8px"><button id="undo" class="btn ghost">↩ desfazer</button><button id="lateAdd" class="btn warn">+ chegou atrasado</button><button id="editPresence" class="btn ghost">editar presença</button><button id="editVoiceNames" class="btn ghost">apelidos de voz</button></div>
 </div>
-<div id="personalLivePanel" class="personalLivePanel">
+<div id="evpBalanceScore" class="panel" style="display:none"></div><div id="personalLivePanel" class="personalLivePanel">
  <div class="personalLiveHead"><div><h2>🔴 Personal ao vivo</h2><div id="personalLiveStatus" class="small">Preparando link temporário…</div></div><span id="personalLiveBadge" class="liveBadge">● AO VIVO</span></div>
  <div class="personalLiveLinkRow"><input id="personalLiveLink" readonly aria-label="Link do Personal ao vivo"><button id="copyPersonalLive" type="button">📋 Copiar</button><button id="sharePersonalLive" type="button">📤 Enviar</button></div>
  <div id="personalQuestionRule" class="personalRule">Regra das perguntas: —</div>
@@ -285,7 +285,7 @@ body.pocketLocked{overflow:hidden;overscroll-behavior:none}
 <div class="panel pdfOnly pdfGlossary"><h3>Glossário rápido</h3><div style="margin-top:6px"><b>CTP — Conhecimento Tático Processual:</b> evidências observadas nas decisões e ações do atleta durante o treino/jogo.</div><div style="margin-top:5px"><b>CTD — Conhecimento Tático Declarativo:</b> evidências de compreensão que o atleta consegue verbalizar ao responder às intervenções do treinador.</div></div>
 <details class="panel trainerOnly"><summary>🔒 Área do treinador — dados individuais</summary><div class="trainerHint">Esta área aparece apenas no aplicativo e não é incluída no PDF compartilhável.</div><div id="reportTable" class="reportTableWrap"></div></details>
 <details class="panel trainerOnly"><summary>🔒 Ranking completo</summary><div class="trainerHint">Uso interno do treinador. O PDF mostra apenas o pontuador do dia.</div><div id="ranking" style="margin-top:10px"></div></details>
-<details class="panel trainerOnly"><summary>🔒 Feedback individual base</summary><div class="trainerHint">Abra apenas quando quiser consultar um atleta. Estes textos não saem no PDF.</div><div id="parents" style="margin-top:10px"></div></details>
+<div id="evpBalanceReport" class="panel" style="display:none"></div><details class="panel trainerOnly"><summary>🔒 Feedback individual base</summary><div class="trainerHint">Abra apenas quando quiser consultar um atleta. Estes textos não saem no PDF.</div><div id="parents" style="margin-top:10px"></div></details>
 <div class="brandFooter"><span class="brandBadge">EVE</span><span>Evolutivo Esportes</span><span class="brandSep">|</span><span class="brandBadge">EVP</span><span>Evolutivo Performance</span></div>
 </div>
 
@@ -350,7 +350,7 @@ function personalLiveViewerUrl(){
 }
 function personalLiveEventList(){
  if(!current)return[];
- return (current.events||[]).filter(e=>['one','three','minus','goal'].includes(e.type)).slice(-100).map(e=>({athlete_id:e.athlete_id,type:e.type,value:e.value||0,goal_count:e.goal_count||0,at:e.at||'',from_voice:!!e.from_voice,pillar:e.pillar||'',dimension:e.dimension||'',teacher_for:e.teacher_for||'',personal_point_v2:!!e.personal_point_v2}));
+ return (current.events||[]).filter(e=>['one','three','minus','goal'].includes(e.type)).slice(-100).map(e=>({athlete_id:e.athlete_id,type:e.type,value:e.value||0,goal_count:e.goal_count||0,at:e.at||'',from_voice:!!e.from_voice}));
 }
 
 const PERSONAL_PILLARS=[
@@ -448,6 +448,7 @@ function setPersonalLiveStatus(msg,ok=false){
  let el=$('personalLiveStatus'),badge=$('personalLiveBadge');if(el)el.textContent=msg||'';if(badge){badge.className='liveBadge'+(ok?' ready':'');badge.textContent=current?.personalLive?.status==='finished'?'✓ ENCERRADO':'● AO VIVO'}
 }
 function renderPersonalLivePanel(){
+ evpRenderBalances();
  let panel=$('personalLivePanel');if(!panel)return;
  let on=current?.mode==='personal'&&current?.status==='running'&&!!current.personalLive;
  panel.classList.toggle('on',!!on);
@@ -508,7 +509,7 @@ function trainingPostIframe(payload){return new Promise((resolve,reject)=>{let c
 function markSessionSync(treinoId,result){let s=(data.sessions||[]).find(x=>String(x.id)===String(treinoId));if(s){s.central_sync='sincronizado';s.central_synced_at=result?.sincronizado_em||new Date().toISOString();s.central_operation=result?.operacao||''}}
 async function syncPendingTrainings(showFeedback=true){let q=pendingTrainingQueue();if(!q.length){renderPendingTrainingStatus();if(showFeedback)alert('Não há treinos pendentes de sincronização.');return{ok:true,synced:0,pending:0}}let cfg=centralCfg();if(!cfg.url||!cfg.token){renderCentralStatus('A conexão com a Central precisa ter URL e token salvos.',true);if(showFeedback)alert('Configure e salve a URL /exec e o token da Central antes de sincronizar os treinos.');return{ok:false,synced:0,pending:q.length}}if(!navigator.onLine){renderPendingTrainingStatus();if(showFeedback)alert(`Sem internet. ${q.length} treino(s) continuam salvos neste aparelho e serão sincronizados depois.`);return{ok:false,synced:0,pending:q.length}}let synced=0,lastErr='';renderCentralStatus(`Enviando histórico: ${q.length} treino(s) pendente(s)…`);for(let item of [...q]){try{item.attempts=(item.attempts||0)+1;let res=await trainingPostIframe(item.payload);data.pendingTrainingSync=pendingTrainingQueue().filter(x=>String(x.treino_id)!==String(item.treino_id));markSessionSync(item.treino_id,res);synced++;lastErr='';localStorage.setItem(KEY,JSON.stringify(data));renderPendingTrainingStatus()}catch(err){item.attempts=(item.attempts||0)+1;item.last_error=String(err?.message||err);lastErr=item.last_error;let idx=pendingTrainingQueue().findIndex(x=>String(x.treino_id)===String(item.treino_id));if(idx>=0)data.pendingTrainingSync[idx]=item;localStorage.setItem(KEY,JSON.stringify(data));break}}let left=pendingTrainingQueue().length;if(left===0){renderCentralStatus(`Histórico atualizado: ${synced} treino(s) sincronizado(s) com a Central.`);if(showFeedback)alert(`${synced} treino(s) sincronizado(s) com sucesso com a Central Evolutivo.`);return{ok:true,synced,pending:0}}renderCentralStatus(`Histórico: ${left} treino(s) ainda pendente(s). ${lastErr||''}`,true);if(showFeedback)alert(`${synced} treino(s) sincronizado(s). ${left} continua(m) pendente(s).\n\n${lastErr||'Tente novamente quando a conexão estiver estável.'}`);return{ok:false,synced,pending:left,error:lastErr}}
 function currentTrainingPending(){if(!current)return false;return pendingTrainingQueue().some(x=>String(x.treino_id)===String(current.id))}
-function refreshCurrentTrainingSyncStatus(){if(!current)return;let s=(data.sessions||[]).find(x=>String(x.id)===String(current.id));if(current.mode==='personal'){setTrainingSyncStatus('✅ Evolutivo Performance: o resultado final fica disponível no mesmo link enviado à família.','ok');return}if(currentTrainingPending()){setTrainingSyncStatus('⚠️ Treino salvo neste aparelho e aguardando sincronização com a Central.','error');return}if(s&&s.central_sync==='sincronizado'){setTrainingSyncStatus('✅ Treino sincronizado com a Central Evolutivo.','ok');return}setTrainingSyncStatus('☁️ Treino salvo. Aguardando confirmação de sincronização.','info')}
+function refreshCurrentTrainingSyncStatus(){if(!current)return;let s=(data.sessions||[]).find(x=>String(x.id)===String(current.id));if(current.mode==='personal'){let pending=evpPendingFinals().some(p=>p.session_id===current.personalLive?.sessionId);setTrainingSyncStatus(pending?'⚠️ Finalização pendente na Central. O saldo ainda pode não incluir esta aula.':'✅ Resultado disponível no link da família. Confira a data da consulta do saldo.',pending?'error':'ok');return}if(currentTrainingPending()){setTrainingSyncStatus('⚠️ Treino salvo neste aparelho e aguardando sincronização com a Central.','error');return}if(s&&s.central_sync==='sincronizado'){setTrainingSyncStatus('✅ Treino sincronizado com a Central Evolutivo.','ok');return}setTrainingSyncStatus('☁️ Treino salvo. Aguardando confirmação de sincronização.','info')}
 
 function today(){let d=new Date();return new Date(d-d.getTimezoneOffset()*60000).toISOString().slice(0,10)}
 function split(n){let p=String(n||"").trim().split(/\s+/).filter(Boolean);return{f:p[0]||"",r:p.slice(1)}}
@@ -529,12 +530,53 @@ document.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{let a=data.ath
 }
 function renderAll(){renderSelects();renderHome();renderManage();renderCentralStatus();if(current){renderCall();renderScore();if(current.status==='running'){ensureTrainingFlow();renderTrainingFlow()}}}
 function addNames(cls,text){let names=text.split(/\n|,/).map(x=>x.trim()).filter(Boolean);if(!cls)return alert("Escolha a turma.");if(!names.length)return alert("Digite nomes.");let add=0,dup=0;names.forEach(n=>{if(data.athletes.some(a=>a.className==cls&&norm(a.name)==norm(n))){dup++;return}data.athletes.push({id:id(),name:n,className:cls,active:true,voiceAlias:'',source:'local',created_at:new Date().toISOString()});add++});save();alert(add+" adicionados"+(dup?` · ${dup} duplicados ignorados`:""))}
+
+// Saldo consultado na Central; nunca descontado apenas no navegador.
+let evpBalanceBusy=false;
+function evpMonth(){return new Intl.DateTimeFormat('sv-SE',{timeZone:'America/Sao_Paulo',year:'numeric',month:'2-digit'}).format(new Date(current?.startedAt||((current?.date||today())+'T12:00:00-03:00')))}
+function evpBalance(aid){let b=data.personalBalances;return b&&b.competencia===evpMonth()?b.atletas.find(a=>String(a.id)===String(aid)):null}
+function evpBalanceText(aid){
+ let a=findSessionAthlete(aid);if(isProfessorParticipant(a))return '';
+ if(String(aid).startsWith('TMP-'))return 'Avulso: sem desconto no pacote.';
+ let b=evpBalance(aid);if(!b)return 'Saldo ainda não consultado.';
+ let tail=b.restantes===0?'Pacote concluído. Renovação pendente.':b.restantes===1?'Última aula disponível.':`Restam ${b.restantes} aulas.`;
+ if(b.excedentes>0)tail+=` ${b.excedentes} aula(s) além do pacote.`;
+ let pending=evpPendingFinals().some(p=>p.participantes.some(a=>String(a.id)===String(aid)&&a.role!=='professor'));
+ return `${tail} ${b.realizadas} realizada(s) de ${b.contratadas} contratada(s).${pending?' Há finalização pendente; o saldo pode ainda não incluir essa aula.':''}`;
+}
+function evpRenderBalances(){
+ for(let id of ['evpBalanceCall','evpBalanceScore','evpBalanceReport']){
+  let el=$(id);if(!el)continue;el.style.display=current?.mode==='personal'?'':'none';if(current?.mode!=='personal')continue;
+  let arr=id==='evpBalanceCall'?sessionRoster().filter(a=>!isProfessorParticipant(a)):personalStudents();
+  let cache=data.personalBalances,info=cache&&cache.competencia===evpMonth()?`Consulta: ${new Date(cache.consultado_em).toLocaleString('pt-BR')}`:'Sem saldo confirmado';
+  el.innerHTML=`<b style="color:#f1cf78">AULAS DO PERSONAL · ${esc(evpMonth())}</b><div class="small">${esc(info)} · Saldo mensal da Central</div>${arr.map(a=>`<div style="margin-top:9px"><b>${esc(a.name)}</b><div>${esc(evpBalanceText(a.id))}</div></div>`).join('')}<button class="smallBtn" data-refresh-balance style="margin-top:10px">${evpBalanceBusy?'Consultando…':'Atualizar saldo'}</button>${current.balanceError?`<div class="small">${esc(current.balanceError)}</div>`:''}`;
+  el.querySelector('button').disabled=evpBalanceBusy;el.querySelector('button').onclick=()=>evpRefreshBalances();
+ }
+}
+async function evpRefreshBalances(){
+ if(evpBalanceBusy)return false;
+ let cfg=centralCfg(),month=evpMonth();evpBalanceBusy=true;evpRenderBalances();
+ try{
+  if(!cfg.url||!cfg.token)throw Error('Configure a URL e o token da Central para consultar o saldo.');
+  if(!navigator.onLine)throw Error('Sem internet. O saldo exibido é da última consulta.');
+  let out=await new Promise((resolve,reject)=>{
+   let cb='evpSaldo_'+Date.now(),script=document.createElement('script'),timer=setTimeout(()=>end(Error('A Central não confirmou o saldo. Tente atualizar novamente.')),15000);
+   function end(err,val){clearTimeout(timer);script.remove();delete window[cb];err?reject(err):resolve(val)}
+   window[cb]=val=>end(null,val);script.onerror=()=>end(Error('Não foi possível consultar o saldo.'));
+   script.src=cfg.url+(cfg.url.includes('?')?'&':'?')+new URLSearchParams({action:'saldo',token:cfg.token,competencia:month,callback:cb,_:Date.now()});document.head.appendChild(script);
+  });
+  if(!out?.ok||!Array.isArray(out.atletas)||out.competencia!==month)throw Error(out?.error||'Resposta de saldo inválida.');
+  data.personalBalances={...out,consultado_em:new Date().toISOString()};localStorage.setItem(KEY,JSON.stringify(data));if(current)current.balanceError='';return true;
+ }catch(e){if(current)current.balanceError=e.message;return false}
+ finally{evpBalanceBusy=false;evpRenderBalances();if(current?.status==='finished')renderReport()}
+}
+
 function currentMode(){return current?.mode||($('useMode')?.value||'central')}
 function sessionRoster(){if(!current)return[];let base=current.mode==='personal'?active('Personal'):active(current.className),temp=Array.isArray(current.tempAthletes)?current.tempAthletes:[];return [...base,...temp].sort((a,b)=>a.name.localeCompare(b.name,'pt-BR'))}
 function findSessionAthlete(aid){return sessionRoster().find(a=>a.id==aid)||data.athletes.find(a=>a.id==aid)||null}
 function addTemporaryAthlete(name,{present=true,late=false,role='atleta'}={}){if(!current)return null;name=String(name||'').trim();if(!name)return null;current.tempAthletes=current.tempAthletes||[];let existing=sessionRoster().find(a=>norm(a.name)==norm(name));if(existing){if(present)current.present[existing.id]=true;if(!current.scores[existing.id])current.scores[existing.id]={one:0,three:0,minus:0};return existing}let a={id:'TMP-'+Date.now().toString(36).toUpperCase()+'-'+Math.floor(Math.random()*9999),name,className:current.className,active:true,source:current.mode==='personal'?(role==='professor'?'personal_professor':'personal_avulso'):'temporario_treino',role,voiceAlias:'',created_at:new Date().toISOString()};current.tempAthletes.push(a);current.present[a.id]=!!present;current.scores[a.id]={one:0,three:0,minus:0};if(late){current.events.push({id:'EV-'+Date.now().toString(36).toUpperCase(),athlete_id:a.id,type:'late_arrival',value:0,at:new Date().toISOString(),from_voice:false,raw:'atleta temporário chegou atrasado'})}return a}
-function start(){if(current&&current.status==='running')return alert('Já existe um treino em andamento. Finalize ou descarte o treino atual antes de preparar outro.');let mode=$('useMode')?.value||'central',cls=mode==='personal'?'Evolutivo Performance':$('classSel').value,arr=mode==='personal'?active('Personal'):active(cls),theme=$('theme').value.trim(),coach=$('coach').value.trim();if(!theme)return alert('Preencha o tema.');if(mode==='personal'&&!arr.length){alert('A lista do Personal ainda não foi carregada. Abra Configurações, preencha o token privado e toque em Atualizar atletas agora.');show('settings');return}if(mode==='central'&&!arr.length){alert('Não há atletas cadastrados. Atualize a Central.');return}current={id:'TREINO-'+Date.now().toString(36).toUpperCase(),date:$('date').value||today(),coach,className:cls,theme,mode,trainingNo:+($('trainingNo').value||1),obs:$('obs').value.trim(),present:{},scores:{},events:[],voiceAliases:{},tempAthletes:[],pedagogy:{collectiveReflections:[],ctdAttempts:[]},actions:[],activeReflectionId:null,status:'call',startedAt:null,endedAt:null,stage:null,stageStartedAt:null,stageHistory:[],activityGroups:null,activityBlock:0,voicePending:[],goals:{},personalLive:null,personalEvaluations:{}};arr.forEach(a=>{current.present[a.id]=mode==='personal'?false:true;current.scores[a.id]={one:0,three:0,minus:0}});if(mode==='personal'&&$('includeCoachPersonal')?.checked){let prof=coach?`Professor ${coach.split(/\s+/)[0]}`:'Professor';addTemporaryAthlete(prof,{present:true,role:'professor'})}renderCall();show('call');}
-function renderCall(){if(!current){$('attGrid').innerHTML='<div class=empty>Prepare um personal.</div>';return}let arr=sessionRoster();arr.forEach(a=>{if(!(a.id in current.present))current.present[a.id]=current.mode==='personal'?false:true;if(!current.scores[a.id])current.scores[a.id]={one:0,three:0,minus:0};else if(current.scores[a.id].minus==null)current.scores[a.id].minus=0});let p=arr.filter(a=>current.present[a.id]).length;$('callInfo').textContent=current.className+' · '+current.theme+(current.mode==='personal'?' · Personal':'');$('presentPill').textContent=p+' presentes';if($('goScore'))$('goScore').textContent=current.status==='running'?'↩ Voltar ao treino':'▶ Iniciar treino';$('attGrid').innerHTML=arr.map(a=>`<button class="att ${current.present[a.id]?'ok':''}" data-pr="${a.id}"><b>${esc(display(a,arr))}</b><span>${esc(a.name)} · ${current.present[a.id]?'presente':'faltou'}${isProfessorParticipant(a)?' · professor':a.source==='personal_avulso'||a.source==='temporario_treino'?' · temporário':''}</span></button>`).join('')||'<div class=empty>Nenhum atleta na chamada. Use “+ atleta” para adicionar.</div>';document.querySelectorAll('[data-pr]').forEach(b=>b.onclick=()=>{current.present[b.dataset.pr]=!current.present[b.dataset.pr];renderCall()})}
+function start(){if(current&&current.status==='running')return alert('Já existe um treino em andamento. Finalize ou descarte o treino atual antes de preparar outro.');let mode=$('useMode')?.value||'central',cls=mode==='personal'?'Evolutivo Performance':$('classSel').value,arr=mode==='personal'?active('Personal'):active(cls),theme=$('theme').value.trim(),coach=$('coach').value.trim();if(!theme)return alert('Preencha o tema.');if(mode==='personal'&&!arr.length){alert('A lista do Personal ainda não foi carregada. Abra Configurações, preencha o token privado e toque em Atualizar atletas agora.');show('settings');return}if(mode==='central'&&!arr.length){alert('Não há atletas cadastrados. Atualize a Central.');return}current={id:'TREINO-'+Date.now().toString(36).toUpperCase(),date:$('date').value||today(),coach,className:cls,theme,mode,trainingNo:+($('trainingNo').value||1),obs:$('obs').value.trim(),present:{},scores:{},events:[],voiceAliases:{},tempAthletes:[],pedagogy:{collectiveReflections:[],ctdAttempts:[]},actions:[],activeReflectionId:null,status:'call',startedAt:null,endedAt:null,stage:null,stageStartedAt:null,stageHistory:[],activityGroups:null,activityBlock:0,voicePending:[],goals:{},personalLive:null,personalEvaluations:{}};arr.forEach(a=>{current.present[a.id]=mode==='personal'?false:true;current.scores[a.id]={one:0,three:0,minus:0}});if(mode==='personal'&&$('includeCoachPersonal')?.checked){let prof=coach?`Professor ${coach.split(/\s+/)[0]}`:'Professor';addTemporaryAthlete(prof,{present:true,role:'professor'})}renderCall();show('call');if(mode==='personal')evpRefreshBalances();}
+function renderCall(){evpRenderBalances();if(!current){$('attGrid').innerHTML='<div class=empty>Prepare um personal.</div>';return}let arr=sessionRoster();arr.forEach(a=>{if(!(a.id in current.present))current.present[a.id]=current.mode==='personal'?false:true;if(!current.scores[a.id])current.scores[a.id]={one:0,three:0,minus:0};else if(current.scores[a.id].minus==null)current.scores[a.id].minus=0});let p=arr.filter(a=>current.present[a.id]).length;$('callInfo').textContent=current.className+' · '+current.theme+(current.mode==='personal'?' · Personal':'');$('presentPill').textContent=p+' presentes';if($('goScore'))$('goScore').textContent=current.status==='running'?'↩ Voltar ao treino':'▶ Iniciar treino';$('attGrid').innerHTML=arr.map(a=>`<button class="att ${current.present[a.id]?'ok':''}" data-pr="${a.id}"><b>${esc(display(a,arr))}</b><span>${esc(a.name)} · ${current.present[a.id]?'presente':'faltou'}${isProfessorParticipant(a)?' · professor':a.source==='personal_avulso'||a.source==='temporario_treino'?' · temporário':''}</span></button>`).join('')||'<div class=empty>Nenhum atleta na chamada. Use “+ atleta” para adicionar.</div>';document.querySelectorAll('[data-pr]').forEach(b=>b.onclick=()=>{current.present[b.dataset.pr]=!current.present[b.dataset.pr];renderCall()})}
 function present(){if(!current)return[];return sessionRoster().filter(a=>current.present[a.id])}
 function firstName(a){return split(a?.name).f||''}
 function voiceName(a,aliases=current?.voiceAliases||{}){return aliases[a.id]||a.voiceAlias||firstName(a)}
@@ -1006,7 +1048,7 @@ function renderPremiumPrintPages(m){
  </div>`;
 }
 
-function renderReport(){let m=met();if(!current||!m)return;renderPremiumCover();renderPremiumPrintPages(m);$("level").textContent='Registro observacional';$("rtotal").textContent=m.total;$("ravg").textContent=m.avg.toFixed(2).replace('.',',');$("rctp").textContent=m.ctpAthletes;$("rctd").textContent=m.ctdAthletes;$("rpen").textContent=m.minus;if($("rgoals"))$("rgoals").textContent=m.goals||0;$("rpresent").textContent=`${m.present}/${m.rosterTotal} presentes`;$("winner").textContent=m.winners.length?m.winners.map(w=>w.display).join(' / '):'Sem pontuação';$("winnerDetail").textContent=m.winners.length?m.winners.map(w=>`${w.name}: ${w.total} pts · ${w.one} CTP +1 · ${w.three} CTD +3 · ${w.minus} desconto(s) −1 · ⚽ ${w.goals||0} gol(s)`).join(' | '):'Nenhum ponto registrado.';$("winnerCompare").innerHTML=winnerComparison(m);$("reportText").textContent=reportText(m);$("pdfHeader").innerHTML=`<h1>Score Atleta Evolutivo - Relatório de treino</h1><div style="margin-top:6px"><b>${esc(current.className)}</b> · ${esc(current.date)} · ${esc(current.theme)}</div>${current.coach?`<div>Treinador: ${esc(current.coach)}</div>`:''}<div>Presentes: ${m.present}/${m.rosterTotal} · Média da turma: ${m.avg.toFixed(2).replace('.',',')} ponto(s) por presente</div>${m.absentees.length?`<div>Ausentes: ${esc(m.absentees.map(a=>a.name).join(', '))}</div>`:''}`;renderCharts(m);renderPhaseReport(m);renderAthleteTable(m);$("ranking").innerHTML=m.ranking.map((r,i)=>`<div class=listRow><div class=rank>${i+1}</div><div><b>${esc(r.display)}</b><div class=small>${esc(r.name)} · ${r.one} CTP +1 · ${r.three} CTD +3 · ${r.minus} desconto(s) −1 · ⚽ ${r.goals||0}</div></div><b>${r.total} pts</b></div>`).join('')||'<div class=empty>Sem ranking.</div>';$("parents").innerHTML=m.ranking.map(r=>`<div class=report style="margin-bottom:8px">${esc(individual(r))}</div>`).join('');bindConceptLinks();refreshCurrentTrainingSyncStatus()}
+function renderReport(){evpRenderBalances();let m=met();if(!current||!m)return;renderPremiumCover();renderPremiumPrintPages(m);$("level").textContent='Registro observacional';$("rtotal").textContent=m.total;$("ravg").textContent=m.avg.toFixed(2).replace('.',',');$("rctp").textContent=m.ctpAthletes;$("rctd").textContent=m.ctdAthletes;$("rpen").textContent=m.minus;if($("rgoals"))$("rgoals").textContent=m.goals||0;$("rpresent").textContent=`${m.present}/${m.rosterTotal} presentes`;$("winner").textContent=m.winners.length?m.winners.map(w=>w.display).join(' / '):'Sem pontuação';$("winnerDetail").textContent=m.winners.length?m.winners.map(w=>`${w.name}: ${w.total} pts · ${w.one} CTP +1 · ${w.three} CTD +3 · ${w.minus} desconto(s) −1 · ⚽ ${w.goals||0} gol(s)`).join(' | '):'Nenhum ponto registrado.';$("winnerCompare").innerHTML=winnerComparison(m);$("reportText").textContent=reportText(m);$("pdfHeader").innerHTML=`<h1>Score Atleta Evolutivo - Relatório de treino</h1><div style="margin-top:6px"><b>${esc(current.className)}</b> · ${esc(current.date)} · ${esc(current.theme)}</div>${current.coach?`<div>Treinador: ${esc(current.coach)}</div>`:''}<div>Presentes: ${m.present}/${m.rosterTotal} · Média da turma: ${m.avg.toFixed(2).replace('.',',')} ponto(s) por presente</div>${m.absentees.length?`<div>Ausentes: ${esc(m.absentees.map(a=>a.name).join(', '))}</div>`:''}`;renderCharts(m);renderPhaseReport(m);renderAthleteTable(m);$("ranking").innerHTML=m.ranking.map((r,i)=>`<div class=listRow><div class=rank>${i+1}</div><div><b>${esc(r.display)}</b><div class=small>${esc(r.name)} · ${r.one} CTP +1 · ${r.three} CTD +3 · ${r.minus} desconto(s) −1 · ⚽ ${r.goals||0}</div></div><b>${r.total} pts</b></div>`).join('')||'<div class=empty>Sem ranking.</div>';$("parents").innerHTML=m.ranking.map(r=>`<div class=report style="margin-bottom:8px">${esc(individual(r))}</div>`).join('');bindConceptLinks();refreshCurrentTrainingSyncStatus()}
 function printReport(){if(!current)return;renderReport();let old=document.title;document.title=`${current.date}_${slug(current.className)}_relatorio`;setTimeout(()=>{window.print();setTimeout(()=>{document.title=old},500)},120)}
 function individual(r){
  if(current?.mode==='personal'){
@@ -1017,6 +1059,7 @@ function individual(r){
    if(r.three>0)parts.push(`${r.three} resposta(s) correta(s) de +3 em perguntas ${mode}.`);
    if(r.minus>0)parts.push(`${r.minus} desconto(s) de −1.`);
    if(r.goals>0)parts.push(`${r.goals} gol(s), contabilizado(s) separadamente do placar.`);
+   parts.push((current.status==='finished'?'Após este treino: ':'Saldo consultado: ')+evpBalanceText(r.id));
    return parts.join(' ');
  }
  let a=[];a.push(`${r.name}: esteve presente no treino sobre “${current.theme}”.`);
@@ -1040,92 +1083,6 @@ function closeEdit(){$("modal").classList.remove("on")}
 
 function openFinishModal(){if(!current)return;let m=met();$("finishSummary").textContent=m?`${current.className} · ${m.present} presente(s) · ${m.total} ponto(s) · ⚽ ${m.goals} gol(s) · ${unresolvedVoicePending().length} pendência(s) de voz.`:'Escolha o que deseja fazer com este treino.';$("finishSave").textContent=current&&current.mode==='personal'?'⭐ Avaliar pilares e finalizar':'💾 Salvar, sincronizar e gerar relatório';$("finishModal").classList.add('on')}
 async function requestFinish(){if(voiceActive)await stopVoice();if(unresolvedVoicePending().length){renderPendingReview();$("pendingReviewModal").classList.add('on');return}openFinishModal()}
-/* Personal 19.1: categorias de pontos e notas independentes; conexão original intacta. */
-const EV_CATS=[
- ['execucao','Execução','fisica','#3b82f6','Domínio, passe e chute'],
- ['intensidade','Intensidade','fisica','#f97316','Ritmo, entrega e prontidão'],
- ['comportamento','Estado de Jogo','fisica','#22c55e','Pedir a bola, expectativa e leitura do entorno'],
- ['concentracao','Concentração','mental','#8b5cf6','Atenção e orientações'],
- ['entendimento','Entendimento do Jogo','mental','#d6b13e','Compreensão e decisões']
-];
-// Saldos informados pelo treinador em 28/10/2026. NÃO são sincronizados
-// automaticamente com a Central; trocar por leitura oficial assim que disponível.
-const EV_BALANCES={
- 'cesar ferrari':3,'murilo prado':3,'heitor silva':2,
- 'joaquim silva':2,'miguel roamania':0,'pierre scandian':4,'gabriela':4
-};
-function evKnownBalance(name){
- const key=norm(name),found=Object.keys(EV_BALANCES).find(k=>key===k||(k==='gabriela'&&key.startsWith('gabriela ')));
- return found===undefined?null:EV_BALANCES[found];
-}
-PERSONAL_PILLARS.find(p=>p.key==='comportamento').label='Estado de Jogo';
-// Enquanto a gramática antiga de voz ainda reconhece +3 e gols, ela fica
-// indisponível neste modo para não registrar pontos incompatíveis com o Personal.
-const evOldStartVoice=startVoice;
-startVoice=function(){if(current?.mode==='personal'){alert('Neste modelo, registre Física ou Mental pelos botões grandes. Os comandos de voz antigos (+3 e gols) ainda não foram adaptados.');return}return evOldStartVoice.apply(this,arguments)};
-const evCss=document.createElement('style');
-evCss.textContent='.evPop{position:fixed;inset:0;z-index:99999;background:#06101eeF;display:flex;align-items:center;justify-content:center;padding:14px}.evDialog{width:min(530px,100%);max-height:94dvh;overflow:auto;background:#13243b;padding:18px;border-radius:22px;color:white}.evChoice{display:block;width:100%;min-height:92px;text-align:left;border:2px solid var(--c);background:#20334b;color:white;border-radius:16px;margin:10px 0;padding:14px;font-size:22px;font-weight:900}.evChoice small{display:block;font-size:14px;font-weight:400}.evPair{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}.evPair button{padding:16px 4px;background:#155b49;border:1px solid #578977;border-radius:14px;color:white;font-weight:900}.evPair button:last-child{background:#3d4e91}.evEvidence{font-size:12px;color:#c0cfdf;margin-top:8px}';
-document.head.appendChild(evCss);
-function evCounts(aid,key,teacher=false){return(current?.events||[]).filter(e=>e.personal_point_v2&&e.pillar===key&&(teacher?e.teacher_for===aid:e.athlete_id===aid)).length}
-function evPick(aid,dim){
- const a=findSessionAthlete(aid),teacher=isProfessorParticipant(a),students=teacher?personalStudents():[];
- const el=document.createElement('div');el.className='evPop';el.setAttribute('role','dialog');el.setAttribute('aria-modal','true');
- el.innerHTML='<div class="evDialog"><h2>+1 '+(dim==='fisica'?'Físico':'Mental')+' · '+(teacher?'Professor':'Atleta')+'</h2><p>'+(teacher?'Selecione a dificuldade observada':'Selecione o acerto observado')+'</p>'+(teacher&&students.length>1?'<select id="evSubject" style="width:100%;padding:12px"><option value="">Escolha o aluno observado</option>'+students.map(s=>'<option value="'+esc(s.id)+'">'+esc(s.name)+'</option>').join('')+'</select>':'')+EV_CATS.filter(c=>c[2]===dim).map(c=>'<button class="evChoice" style="--c:'+c[3]+'" data-pillar="'+c[0]+'">'+c[1]+'<small>'+c[4]+'</small></button>').join('')+'<button id="evCancel" style="padding:12px;width:100%">Cancelar</button></div>';
- const close=()=>el.remove();el.querySelector('#evCancel').onclick=close;el.onclick=e=>{if(e.target===el)close()};
- el.querySelectorAll('[data-pillar]').forEach(b=>b.onclick=()=>{
-   let subject=teacher?(students.length===1?students[0].id:el.querySelector('#evSubject')?.value):aid;
-   if(teacher&&!subject){alert('Selecione o aluno observado.');return}
-   const ev=point(aid,'one',false,{raw:'Personal: '+dim+' / '+b.dataset.pillar});
-   if(ev){ev.pillar=b.dataset.pillar;ev.dimension=dim;ev.teacher_for=teacher?subject:null;ev.personal_point_v2=true;renderScore();schedulePersonalLiveSync()}
-   close();
- });document.body.appendChild(el);
-}
-const evOldScore=renderScore;
-renderScore=function(){
- evOldScore();if(current?.mode!=='personal')return;
- $('stOneLabel').textContent='Físico +1';$('stThreeLabel').textContent='Mental +1';
- const goal=$('stGoals')?.closest('.stat');if(goal)goal.style.display='none';
- present().forEach(a=>{
-  const tile=document.getElementById('t_'+a.id)?.closest('.tile');if(!tile)return;
-  let pts=tile.querySelector('.pts');if(!pts)return;
-  const fys=EV_CATS.filter(c=>c[2]==='fisica').reduce((n,c)=>n+evCounts(a.id,c[0]),0);
-  const men=EV_CATS.filter(c=>c[2]==='mental').reduce((n,c)=>n+evCounts(a.id,c[0]),0);
-  pts.innerHTML='<div class="evPair" style="grid-column:1/-1"><button data-ev-physical="'+esc(a.id)+'">+1 FÍSICO</button><button data-ev-mental="'+esc(a.id)+'">+1 MENTAL</button></div><div class="evEvidence" style="grid-column:1/-1">Registros: físico '+fys+' · mental '+men+'</div>';
-  tile.querySelector('.goalCount')?.remove();
- });
- document.querySelectorAll('[data-ev-physical]').forEach(b=>b.onclick=()=>evPick(b.dataset.evPhysical,'fisica'));
- document.querySelectorAll('[data-ev-mental]').forEach(b=>b.onclick=()=>evPick(b.dataset.evMental,'mental'));
- live();
-};
-const evOldLive=live;
-live=function(){
- evOldLive();if(current?.mode!=='personal')return;
- const events=(current.events||[]).filter(e=>e.personal_point_v2);
- $('stOne').textContent=events.filter(e=>e.dimension==='fisica').length;
- $('stThree').textContent=events.filter(e=>e.dimension==='mental').length;
-};
-const evOldLivePanel=renderPersonalLivePanel;
-renderPersonalLivePanel=function(){
- evOldLivePanel();
- if(current?.mode==='personal'&&$('personalQuestionRule'))$('personalQuestionRule').textContent='Cada acerto físico ou mental vale +1. Os pontos do professor registram dificuldades observadas no atleta.';
-};
-// Não apresentar a instrução antiga de voz, que ainda menciona +3 e gols.
-document.querySelectorAll('.voicePanel').forEach(e=>{if(e.textContent.includes('Modo Quadra por voz'))e.style.display='none'});
-personalEvaluationFor=function(aid){
- const notes=personalEvaluationNotes(aid),valid=PERSONAL_PILLARS.every(p=>notes[p.key]!==null),total=personalAthleteTotal(aid),media=valid?+(PERSONAL_PILLARS.reduce((n,p)=>n+notes[p.key],0)/5).toFixed(1):null;
- let pilares={};PERSONAL_PILLARS.forEach(p=>{const good=evCounts(aid,p.key),difficult=evCounts(aid,p.key,true);pilares[p.key]={nota:notes[p.key],pontos:good,label:p.label,acertos:good,dificuldades:difficult,sem_registro:good+difficult===0}});
- return{versao:'pilares_v2_independentes',media,total_pontos:total,pilares,completo:valid};
-};
-personalEvaluationSummaryHtml=function(aid){
- const ev=personalEvaluationFor(aid),parts=PERSONAL_PILLARS.map(p=>{let x=ev.pilares[p.key];return esc(p.label)+': <b>'+(x.nota===null?'sem nota':x.nota+'/10')+'</b> · '+x.acertos+' acerto(s) · '+x.dificuldades+' dificuldade(s)'+(x.sem_registro?' · sem pontos registrados':'')});
- return '<b>Notas independentes da pontuação.</b> '+(ev.completo?'<span class="gold">Média '+ev.media+'/10</span>':'Complete as cinco notas.')+'<br>'+parts.join('<br>');
-};
-const evOldPayload=personalLivePayload;
-personalLivePayload=function(statusOverride){
- const payload=evOldPayload(statusOverride);if(!payload)return payload;
- payload.participantes.forEach(p=>{p.saldo_aulas=evKnownBalance(p.nome);p.saldo_origem='informado_pelo_treinador';p.saldo_referencia='2026-10-28'});
- return payload;
-};
 $("date").value=today();
 document.querySelectorAll(".nav button").forEach(b=>b.onclick=async()=>{if(["call","score","report"].includes(b.dataset.s)&&!current)return alert("Prepare um treino primeiro.");if(voiceActive&&b.dataset.s!="score")await stopVoice();show(b.dataset.s)});
 $("gear").onclick=async()=>{if(voiceActive)await stopVoice();show("settings")};$("syncNow").onclick=syncCentralAthletes;$("syncCentral").onclick=syncCentralAthletes;$("syncPending").onclick=()=>syncPendingTrainings(true);$("syncPendingHome").onclick=()=>syncPendingTrainings(true);$("saveCentral").onclick=()=>{if(saveCentralSettings())renderCentralStatus()};$("goCall").onclick=start;$("goScore").onclick=goScore;if($("copyPersonalLive"))$("copyPersonalLive").onclick=copyPersonalLive;if($("sharePersonalLive"))$("sharePersonalLive").onclick=sharePersonalLive;$("voiceToggle").onclick=toggleVoice;$("pocketToggle").onclick=togglePocketMode;$("micTest").onclick=()=>requestMicrophonePermission(true);$("lateAdd").onclick=addLateAthlete;$("editPresence").onclick=async()=>{if(voiceActive)await stopVoice();show("call")};$("backToCall").onclick=()=>show(current&&current.status==='running'?"score":"call");$("saveVoiceNames").onclick=saveVoiceAliases;$("editVoiceNames").onclick=()=>{renderVoiceNames("all");show("voiceNames")};$("finish").onclick=requestFinish;$("undo").onclick=undo;$("cols").onchange=()=>renderScore();
@@ -1158,13 +1115,14 @@ async function evpRetryFinals(){
  if(evpFinalRetryBusy||!navigator.onLine||!evpPendingFinals().length)return;
  evpFinalRetryBusy=true;
  try{for(const payload of evpPendingFinals()){
-   try{const result=await personalLivePostVerified(payload);if(personalLiveSnapshotMatches(result,payload))evpRemoveFinal(payload.session_id)}
+   try{const result=await personalLivePostVerified(payload);if(personalLiveSnapshotMatches(result,payload)){evpRemoveFinal(payload.session_id);if(current?.mode==='personal')await evpRefreshBalances()}}
    catch(err){console.warn('EVP: avaliação final aguardando confirmação da Central:',err?.message||err);break}
  }}finally{evpFinalRetryBusy=false}
 }
 async function finalizeCurrentTraining(){
- if(!current)return;
+ if(!current||current.finalizing||current.status==='finished')return;
  if(current.mode==='personal'&&!allPersonalEvaluationsComplete())return openPersonalEvaluationModal();
+ current.finalizing=true;
  if(current.stage==='explicacao')closeCollectiveReflection('fim_treino');
  current.endedAt=new Date().toISOString();current.stageHistory=current.stageHistory||[];current.stageHistory.push({type:'training_end',at:current.endedAt,stage:current.stage});current.status='finished';if(trainingTimer){clearInterval(trainingTimer);trainingTimer=null}
  let shouldSync=current.mode!=='personal';if(shouldSync)recordCurrentSession();
@@ -1175,11 +1133,12 @@ async function finalizeCurrentTraining(){
    current.personalLive.status='finished';
    evpQueueFinal(personalLivePayload('finished'));
    personalSyncResult=await syncPersonalLiveNow(true,'finished');
-   if(personalSyncResult?.ok)evpRemoveFinal(current.personalLive.sessionId);
+   if(personalSyncResult?.ok){evpRemoveFinal(current.personalLive.sessionId);await evpRefreshBalances();}
  }
  if(shouldSync){let payload=exportObj();queueTrainingForSync(payload)}
+ current.finalizing=false;
  $('finishModal')?.classList.remove('on');$('personalEvalModal')?.classList.remove('on');renderReport();show('report');
- if(!shouldSync){refreshCurrentTrainingSyncStatus();if(personalSyncResult?.ok){alert('Treino confirmado na Central! A avaliação dos cinco pilares e o saldo de aulas já estão disponíveis no Portal da Família; se ele estiver aberto, será atualizado automaticamente.')}else{alert('Treino salvo neste aparelho. O envio ao Portal está pendente e será tentado novamente automaticamente quando houver conexão. Não apague os dados do navegador.')}return}
+ if(!shouldSync){refreshCurrentTrainingSyncStatus();if(personalSyncResult?.ok){alert('Treino confirmado na Central!\n\n'+personalStudents().map(a=>a.name+': '+evpBalanceText(a.id)).join('\n')+'\n\nConfira o resumo e o feedback abaixo.')}else{alert('Treino salvo neste aparelho. O envio ao Portal está pendente e será tentado novamente automaticamente quando houver conexão. Não apague os dados do navegador.')}return}
  setTrainingSyncStatus('☁️ Treino salvo neste aparelho. Enviando para a Central…','info');let result=await syncPendingTrainings(false);refreshCurrentTrainingSyncStatus();if(!result.ok&&result.pending){console.warn('Treino pendente de sincronização:',result.error||'sem conexão')}
 }
 $("finishSave").onclick=async()=>{if(!current)return;if(current.mode==='personal'){openPersonalEvaluationModal();return}await finalizeCurrentTraining()};
