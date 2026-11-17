@@ -189,7 +189,7 @@ body.pocketLocked{overflow:hidden;overscroll-behavior:none}
 <body>
 <header class="top"><div><h1>Score Personal Evolutivo <span style="font-size:11px;color:#f59e0b;vertical-align:middle">V19.0</span></h1><div id="sub" class="small">Personal · CTP na ação · CTD na reflexão</div></div><button class="btn" id="gear">⚙️</button></header>
 
-<section id="home" class="screen on">
+<section id="home" class="screen on"><div class="panel" id="evpPackageManager"></div>
 <div class="panel schoolLegacy">
  <div class="flex between"><div><h2>🔄 Central Evolutivo</h2><div id="syncStatus" class="small">Cadastro ainda não sincronizado com a planilha.</div><div id="pendingHomeStatus" class="small" style="margin-top:4px;color:#d9c38d">Histórico: nenhum treino pendente.</div></div><button id="syncNow" class="btn good">Atualizar atletas</button></div>
  <div class="small" style="margin-top:8px">Busca ID permanente, nome, horário e status diretamente da Central. Ao finalizar um treino da Escolinha, o histórico é enviado automaticamente. Se faltar internet, ele fica pendente neste aparelho.</div><button id="syncPendingHome" class="btn ghost" style="width:100%;margin-top:9px">☁️ Sincronizar treinos pendentes</button>
@@ -320,7 +320,7 @@ body.pocketLocked{overflow:hidden;overscroll-behavior:none}
 
 <script>
 const KEY="score_atleta_evolutivo_v2_persistente";
-const APP_VERSION="19.0";
+const APP_VERSION="20.0";
 const $=id=>document.getElementById(id);
 let data=load(), current=null;
 let voiceRecognition=null, voiceActive=false, voiceStarting=false, voiceRestartTimer=null, wakeLock=null, voiceRecent=[], collectiveTimer=null, lastVoiceRaw="", lastVoiceAt=0;
@@ -331,7 +331,7 @@ function norm(s){return String(s||"").trim().toLowerCase().normalize("NFD").repl
 function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
 function load(){try{let x=JSON.parse(localStorage.getItem(KEY));if(x&&x.classes&&x.athletes){x.sessions=Array.isArray(x.sessions)?x.sessions:[];x.centralSync=x.centralSync||{};x.pendingTrainingSync=Array.isArray(x.pendingTrainingSync)?x.pendingTrainingSync:[];return x}}catch(e){}return{classes:["Turma 1","Turma 2"],athletes:[],sessions:[],centralSync:{},pendingTrainingSync:[]}}
 function save(){localStorage.setItem(KEY,JSON.stringify(data));renderAll()}
-function centralCfg(){data.centralSync=data.centralSync||{};const nova='https://script.google.com/macros/s/AKfycbxut8Il_bV8LG2ULB61k_dwJLI4CvGNoam7Ed2777HFu5A7X6lVAwQN_hXe_ovPaPYr/exec';if(data.centralSync.url!==nova){data.centralSync.url=nova;data.centralSync.token='';data.centralSync.syncedAt='';}return data.centralSync}
+function centralCfg(){data.centralSync=data.centralSync||{};const nova='https://script.google.com/macros/s/AKfycbxut8Il_bV8LG2ULB61k_dwJLI4CvGNoam7Ed2777HFu5A7X6lVAwQN_hXe_ovPaPYr/exec';if(!data.centralSync.url)data.centralSync.url=nova;return data.centralSync}
 
 function isProfessorParticipant(a){return !!a&&(a.role==='professor'||String(a.source||'')==='personal_professor')}
 function personalStudents(){return current&&current.mode==='personal'?present().filter(a=>!isProfessorParticipant(a)):[]}
@@ -358,7 +358,7 @@ const PERSONAL_PILLARS=[
  {key:'comportamento',label:'Comportamento',color:'#22c55e'},
  {key:'intensidade',label:'Intensidade',color:'#f97316'},
  {key:'concentracao',label:'Concentração',color:'#8b5cf6'},
- {key:'entendimento',label:'Entendimento do jogo',color:'#d6b13e'}
+ {key:'entendimento',label:'Estado de jogo',color:'#d6b13e'}
 ];
 function personalAthleteTotal(aid){let s=current?.scores?.[aid]||{one:0,three:0,minus:0};return Math.max(0,Math.round(+(s.one||0)+3*+(s.three||0)-+(s.minus||0)))}
 function personalEvaluationNotes(aid){let src=current?.personalEvaluations?.[aid]||{};let out={};PERSONAL_PILLARS.forEach(p=>{let v=src[p.key];out[p.key]=(v===0||v)?Math.max(0,Math.min(10,Math.round(Number(v)))):null});return out}
@@ -505,7 +505,7 @@ function pendingTrainingQueue(){data.pendingTrainingSync=Array.isArray(data.pend
 function renderPendingTrainingStatus(){let q=pendingTrainingQueue(),n=q.length,msg=n?`Histórico: ${n} treino(s) aguardando sincronização.`:'Histórico: nenhum treino pendente.';['pendingHomeStatus','pendingSettingsStatus'].forEach(id=>{let el=$(id);if(el){el.textContent=msg;el.style.color=n?'#f0cb72':'#86efac'}});['syncPending','syncPendingHome'].forEach(id=>{let b=$(id);if(b){b.disabled=!n;b.style.opacity=n?'1':'.55'}})}
 function setTrainingSyncStatus(msg,kind='info'){let el=$('trainingSyncStatus');if(!el)return;el.textContent=msg;el.style.color=kind==='ok'?'#86efac':kind==='error'?'#fecaca':'#d9c38d';el.style.borderColor=kind==='ok'?'rgba(34,197,94,.35)':kind==='error'?'rgba(239,68,68,.38)':'rgba(214,168,67,.28)'}
 function queueTrainingForSync(payload){if(!payload||!payload.treino||!payload.treino.id)return;let q=pendingTrainingQueue(),tid=String(payload.treino.id),item={treino_id:tid,payload,queued_at:new Date().toISOString(),attempts:0,last_error:''},i=q.findIndex(x=>String(x.treino_id)===tid);if(i>=0){item.queued_at=q[i].queued_at||item.queued_at;item.attempts=q[i].attempts||0;q[i]=item}else q.push(item);localStorage.setItem(KEY,JSON.stringify(data));renderPendingTrainingStatus()}
-function trainingPostIframe(payload){return new Promise((resolve,reject)=>{let cfg=centralCfg();if(!cfg.url) return reject(new Error('URL do Web App não configurada.'));if(!cfg.token) return reject(new Error('Token do App de Treino não configurado.'));if(!navigator.onLine)return reject(new Error('Sem conexão com a internet.'));let req='eveTrain_'+Date.now()+'_'+Math.floor(Math.random()*999999),frame=document.createElement('iframe'),form=document.createElement('form'),done=false,timer;frame.name=req+'_frame';frame.style.cssText='position:fixed;width:1px;height:1px;left:-9999px;top:-9999px;border:0;opacity:0;pointer-events:none';form.method='POST';form.action=cfg.url;form.target=frame.name;form.style.display='none';[['action','salvar_treino'],['token',cfg.token],['transport','iframe'],['request_id',req],['payload',JSON.stringify(payload)]].forEach(([name,value])=>{let i=document.createElement('input');i.type='hidden';i.name=name;i.value=value;form.appendChild(i)});function cleanup(){if(done)return;done=true;clearTimeout(timer);window.removeEventListener('message',onMessage);setTimeout(()=>{form.remove();frame.remove()},50)}function onMessage(ev){let m=ev.data;if(!m||m.source!=='central_evolutivo'||m.type!=='treino_sync_result'||m.request_id!==req)return;cleanup();let out=m.payload||{};out&&out.ok===true?resolve(out):reject(new Error(out.error||'A Central recusou o treino.'))}window.addEventListener('message',onMessage);document.body.appendChild(frame);document.body.appendChild(form);timer=setTimeout(()=>{cleanup();reject(new Error('Tempo limite ao enviar o treino para a Central.'))},25000);try{form.submit()}catch(err){cleanup();reject(err)}})}
+function trainingPostIframe(payload,action='salvar_treino'){return new Promise((resolve,reject)=>{let cfg=centralCfg();if(!cfg.url) return reject(new Error('URL do Web App não configurada.'));if(!cfg.token) return reject(new Error('Token do App de Treino não configurado.'));if(!navigator.onLine)return reject(new Error('Sem conexão com a internet.'));let req='eveTrain_'+Date.now()+'_'+Math.floor(Math.random()*999999),frame=document.createElement('iframe'),form=document.createElement('form'),done=false,timer;frame.name=req+'_frame';frame.style.cssText='position:fixed;width:1px;height:1px;left:-9999px;top:-9999px;border:0;opacity:0;pointer-events:none';form.method='POST';form.action=cfg.url;form.target=frame.name;form.style.display='none';[['action',action],['token',cfg.token],['transport','iframe'],['request_id',req],['payload',JSON.stringify(payload)]].forEach(([name,value])=>{let i=document.createElement('input');i.type='hidden';i.name=name;i.value=value;form.appendChild(i)});function cleanup(){if(done)return;done=true;clearTimeout(timer);window.removeEventListener('message',onMessage);setTimeout(()=>{form.remove();frame.remove()},50)}function onMessage(ev){let m=ev.data;if(!m||m.source!=='central_evolutivo'||m.type!=='treino_sync_result'||m.request_id!==req)return;cleanup();let out=m.payload||{};out&&out.ok===true?resolve(out):reject(Object.assign(new Error(out.error||'A Central recusou a operação.'),{centralRejected:true}))}window.addEventListener('message',onMessage);document.body.appendChild(frame);document.body.appendChild(form);timer=setTimeout(()=>{cleanup();reject(new Error('Tempo limite ao enviar o treino para a Central.'))},25000);try{form.submit()}catch(err){cleanup();reject(err)}})}
 function markSessionSync(treinoId,result){let s=(data.sessions||[]).find(x=>String(x.id)===String(treinoId));if(s){s.central_sync='sincronizado';s.central_synced_at=result?.sincronizado_em||new Date().toISOString();s.central_operation=result?.operacao||''}}
 async function syncPendingTrainings(showFeedback=true){let q=pendingTrainingQueue();if(!q.length){renderPendingTrainingStatus();if(showFeedback)alert('Não há treinos pendentes de sincronização.');return{ok:true,synced:0,pending:0}}let cfg=centralCfg();if(!cfg.url||!cfg.token){renderCentralStatus('A conexão com a Central precisa ter URL e token salvos.',true);if(showFeedback)alert('Configure e salve a URL /exec e o token da Central antes de sincronizar os treinos.');return{ok:false,synced:0,pending:q.length}}if(!navigator.onLine){renderPendingTrainingStatus();if(showFeedback)alert(`Sem internet. ${q.length} treino(s) continuam salvos neste aparelho e serão sincronizados depois.`);return{ok:false,synced:0,pending:q.length}}let synced=0,lastErr='';renderCentralStatus(`Enviando histórico: ${q.length} treino(s) pendente(s)…`);for(let item of [...q]){try{item.attempts=(item.attempts||0)+1;let res=await trainingPostIframe(item.payload);data.pendingTrainingSync=pendingTrainingQueue().filter(x=>String(x.treino_id)!==String(item.treino_id));markSessionSync(item.treino_id,res);synced++;lastErr='';localStorage.setItem(KEY,JSON.stringify(data));renderPendingTrainingStatus()}catch(err){item.attempts=(item.attempts||0)+1;item.last_error=String(err?.message||err);lastErr=item.last_error;let idx=pendingTrainingQueue().findIndex(x=>String(x.treino_id)===String(item.treino_id));if(idx>=0)data.pendingTrainingSync[idx]=item;localStorage.setItem(KEY,JSON.stringify(data));break}}let left=pendingTrainingQueue().length;if(left===0){renderCentralStatus(`Histórico atualizado: ${synced} treino(s) sincronizado(s) com a Central.`);if(showFeedback)alert(`${synced} treino(s) sincronizado(s) com sucesso com a Central Evolutivo.`);return{ok:true,synced,pending:0}}renderCentralStatus(`Histórico: ${left} treino(s) ainda pendente(s). ${lastErr||''}`,true);if(showFeedback)alert(`${synced} treino(s) sincronizado(s). ${left} continua(m) pendente(s).\n\n${lastErr||'Tente novamente quando a conexão estiver estável.'}`);return{ok:false,synced,pending:left,error:lastErr}}
 function currentTrainingPending(){if(!current)return false;return pendingTrainingQueue().some(x=>String(x.treino_id)===String(current.id))}
@@ -518,7 +518,7 @@ function active(cls){return data.athletes.filter(a=>a.className==cls&&a.active!=
 function all(cls){return data.athletes.filter(a=>a.className==cls).sort((a,b)=>a.name.localeCompare(b.name,"pt-BR"))}
 function show(s){document.querySelectorAll(".screen").forEach(x=>x.classList.remove("on"));$(s).classList.add("on");document.querySelectorAll(".nav button").forEach(b=>b.classList.toggle("on",b.dataset.s==s));$("sub").textContent={home:"Personal · CTP na ação · CTD na reflexão",call:"Marque presença e falta",score:"CTP na ação • CTD na reflexão",report:"Evidências observadas no treino",voiceNames:"Apelidos de voz",settings:"Turmas e atletas fixos"}[s]||"";if(s=="score")renderScore();if(s=="report")renderReport()}
 function renderSelects(){let opts=data.classes.length?data.classes.map(c=>`<option>${esc(c)}</option>`).join(""):'<option value="">Nenhuma turma</option>';["classSel","addClassSel","filterClass","editClass"].forEach(i=>{let e=$(i),v=e.value;e.innerHTML=opts;if(data.classes.includes(v))e.value=v})}
-function renderHome(){let total=data.athletes.filter(a=>a.active!==false).length;$("cadResumo").textContent=total+" atletas ativos";$("classesResumo").innerHTML=data.classes.map(c=>{let n=active(c).length,off=data.athletes.filter(a=>a.className==c&&a.active===false).length;return `<div class=listRow><div class=rank>•</div><div><b>${esc(c)}</b><div class=small>${n} ativos ${off?`· ${off} inativos`:""}</div></div><span class=pill>${n}</span></div>`}).join("")||"<div class=empty>Nenhuma turma.</div>"}
+function renderHome(){evpRenderManager();let total=data.athletes.filter(a=>a.active!==false).length;$("cadResumo").textContent=total+" atletas ativos";$("classesResumo").innerHTML=data.classes.map(c=>{let n=active(c).length,off=data.athletes.filter(a=>a.className==c&&a.active===false).length;return `<div class=listRow><div class=rank>•</div><div><b>${esc(c)}</b><div class=small>${n} ativos ${off?`· ${off} inativos`:""}</div></div><span class=pill>${n}</span></div>`}).join("")||"<div class=empty>Nenhuma turma.</div>"}
 function renderManage(){ $("classManage").innerHTML=data.classes.map(c=>{let qtd=data.athletes.filter(a=>a.className==c).length;return `<div class=listRow><div class=rank>•</div><div><b>${esc(c)}</b><div class=small>${qtd} atletas</div></div><div class=flex><button class=smallBtn data-ec="${esc(c)}">Editar</button><button class=smallBtn data-dc="${esc(c)}" style="color:#fecaca;border-color:rgba(239,68,68,.38)">Excluir</button></div></div>`}).join("")||"<div class=empty>Nenhuma turma cadastrada.</div>";
 document.querySelectorAll("[data-ec]").forEach(b=>b.onclick=()=>{let old=b.dataset.ec,n=prompt("Novo nome da turma:",old);if(!n||!n.trim())return;n=n.trim();if(data.classes.some(c=>norm(c)==norm(n)&&c!=old))return alert("Turma já existe.");data.classes=data.classes.map(c=>c==old?n:c);data.athletes.forEach(a=>{if(a.className==old)a.className=n});if(current&&current.className==old)current.className=n;save()});
 document.querySelectorAll("[data-dc]").forEach(b=>b.onclick=()=>{let cls=b.dataset.dc,qtd=data.athletes.filter(a=>a.className==cls).length,msg=qtd?`Excluir a turma "${cls}"? Isso também excluirá ${qtd} atleta(s) vinculados a ela. Esta ação não pode ser desfeita.`:`Excluir a turma "${cls}"? Esta ação não pode ser desfeita.`;if(!confirm(msg))return;if(current&&current.className==cls){if(!confirm("Há um treino desta turma em andamento. Excluir a turma também encerrará esse treino na tela. Deseja continuar?"))return;current=null}data.athletes=data.athletes.filter(a=>a.className!=cls);data.classes=data.classes.filter(c=>c!=cls);save();show("settings")});
@@ -531,14 +531,16 @@ document.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{let a=data.ath
 function renderAll(){renderSelects();renderHome();renderManage();renderCentralStatus();if(current){renderCall();renderScore();if(current.status==='running'){ensureTrainingFlow();renderTrainingFlow()}}}
 function addNames(cls,text){let names=text.split(/\n|,/).map(x=>x.trim()).filter(Boolean);if(!cls)return alert("Escolha a turma.");if(!names.length)return alert("Digite nomes.");let add=0,dup=0;names.forEach(n=>{if(data.athletes.some(a=>a.className==cls&&norm(a.name)==norm(n))){dup++;return}data.athletes.push({id:id(),name:n,className:cls,active:true,voiceAlias:'',source:'local',created_at:new Date().toISOString()});add++});save();alert(add+" adicionados"+(dup?` · ${dup} duplicados ignorados`:""))}
 
-// Saldo consultado na Central; nunca descontado apenas no navegador.
-let evpBalanceBusy=false;
-function evpMonth(){return new Intl.DateTimeFormat('sv-SE',{timeZone:'America/Sao_Paulo',year:'numeric',month:'2-digit'}).format(new Date(current?.startedAt||((current?.date||today())+'T12:00:00-03:00')))}
-function evpBalance(aid){let b=data.personalBalances;return b&&b.competencia===evpMonth()?b.atletas.find(a=>String(a.id)===String(aid)):null}
+
+// V20: saldo confirmado é sempre restaurado da Central, nunca recriado pelo navegador.
+let evpBalanceBusy=false,evpManageError='',evpManageBusy=false;
+function evpMonth(){return 'continuo'}
+function evpBalance(aid){return data.personalBalances?.controle==='pacote_continuo'?data.personalBalances.atletas.find(a=>String(a.id)===String(aid)):null}
 function evpBalanceText(aid){
  let a=findSessionAthlete(aid);if(isProfessorParticipant(a))return '';
  if(String(aid).startsWith('TMP-'))return 'Avulso: sem desconto no pacote.';
  let b=evpBalance(aid);if(!b)return 'Saldo ainda não consultado.';
+ if(!b.configurado)return 'Saldo inicial ainda não configurado pelo treinador.';
  let tail=b.restantes===0?'Pacote concluído. Renovação pendente.':b.restantes===1?'Última aula disponível.':`Restam ${b.restantes} aulas.`;
  if(b.excedentes>0)tail+=` ${b.excedentes} aula(s) além do pacote.`;
  let pending=evpPendingFinals().some(p=>p.participantes.some(a=>String(a.id)===String(aid)&&a.role!=='professor'));
@@ -548,27 +550,84 @@ function evpRenderBalances(){
  for(let id of ['evpBalanceCall','evpBalanceScore','evpBalanceReport']){
   let el=$(id);if(!el)continue;el.style.display=current?.mode==='personal'?'':'none';if(current?.mode!=='personal')continue;
   let arr=id==='evpBalanceCall'?sessionRoster().filter(a=>!isProfessorParticipant(a)):personalStudents();
-  let cache=data.personalBalances,info=cache&&cache.competencia===evpMonth()?`Consulta: ${new Date(cache.consultado_em).toLocaleString('pt-BR')}`:'Sem saldo confirmado';
-  el.innerHTML=`<b style="color:#f1cf78">AULAS DO PERSONAL · ${esc(evpMonth())}</b><div class="small">${esc(info)} · Saldo mensal da Central</div>${arr.map(a=>`<div style="margin-top:9px"><b>${esc(a.name)}</b><div>${esc(evpBalanceText(a.id))}</div></div>`).join('')}<button class="smallBtn" data-refresh-balance style="margin-top:10px">${evpBalanceBusy?'Consultando…':'Atualizar saldo'}</button>${current.balanceError?`<div class="small">${esc(current.balanceError)}</div>`:''}`;
+  let cache=data.personalBalances,info=cache?.controle==='pacote_continuo'?`Consulta: ${new Date(cache.consultado_em).toLocaleString('pt-BR')}`:'Sem saldo confirmado';
+  el.innerHTML=`<b style="color:#f1cf78">AULAS DO PERSONAL</b><div class="small">${esc(info)} · Pacote contínuo</div>${arr.map(a=>`<div style="margin-top:9px"><b>${esc(a.name)}</b><div>${esc(evpBalanceText(a.id))}</div></div>`).join('')}<button class="smallBtn" data-refresh-balance style="margin-top:10px">${evpBalanceBusy?'Consultando…':'Atualizar saldo'}</button>${current.balanceError?`<div class="small">${esc(current.balanceError)}</div>`:''}`;
   el.querySelector('button').disabled=evpBalanceBusy;el.querySelector('button').onclick=()=>evpRefreshBalances();
  }
+ evpRenderManager();
+}
+function evpReadState(op_id=''){
+ let cfg=centralCfg();return new Promise((resolve,reject)=>{
+  if(!cfg.url||!cfg.token)return reject(Error('Salve a URL e o token da Central em Configurações.'));
+  if(!navigator.onLine)return reject(Error('Sem internet. Os valores exibidos são da última consulta; aguarde conexão para alterar pacotes.'));
+  let cb='evpState_'+Date.now()+'_'+Math.floor(Math.random()*99999),script=document.createElement('script'),done=false,timer=setTimeout(()=>end(Error('Tempo limite ao consultar a Central.')),15000);
+  function end(err,val){if(done)return;done=true;clearTimeout(timer);script.remove();delete window[cb];err?reject(err):resolve(val)}
+  window[cb]=val=>val?.ok&&val.versao==='evp_v20'?end(null,val):end(Error(val?.error||'Atualize a Central para V20 antes de usar pacotes.'));
+  script.onerror=()=>end(Error('Não foi possível consultar a Central.'));
+  script.src=cfg.url+(cfg.url.includes('?')?'&':'?')+new URLSearchParams({action:'app_state',token:cfg.token,op_id,callback:cb,_:Date.now()});document.head.appendChild(script);
+ });
+}
+function evpApplyState(out){
+ if(out.saldo?.controle!=='pacote_continuo')throw Error('A Central ainda está no controle mensal. Instale o código novo.');
+ data.personalBalances={...out.saldo,consultado_em:new Date().toISOString()};
+ let old=new Map(data.athletes.map(a=>[String(a.id),a]));
+ data.athletes=out.atletas.map(a=>({...old.get(String(a.id)),id:String(a.id),name:a.nome,className:'Personal',active:a.ativo!==false,source:'central_evolutivo'}));data.classes=['Personal'];
+ localStorage.setItem(KEY,JSON.stringify(data));
 }
 async function evpRefreshBalances(){
- if(evpBalanceBusy)return false;
- let cfg=centralCfg(),month=evpMonth();evpBalanceBusy=true;evpRenderBalances();
+ if(evpBalanceBusy)return false;evpBalanceBusy=true;evpRenderBalances();
+ try{let out=await evpReadState();evpApplyState(out);if(current)current.balanceError='';evpManageError='';return true}
+ catch(e){if(current)current.balanceError=e.message;evpManageError=e.message;return false}
+ finally{evpBalanceBusy=false;evpRenderBalances();renderHome();if(current?.status==='finished')renderReport();else if(current?.status==='call')renderCall()}
+}
+function evpPendingOperation(){try{return JSON.parse(localStorage.getItem('evp_package_pending_v20')||'null')}catch(_){return null}}
+function evpRenderManager(){
+ let el=$('evpPackageManager');if(!el)return;
+ let arr=data.personalBalances?.controle==='pacote_continuo'?data.personalBalances.atletas:[],pending=evpPendingOperation();
+ el.innerHTML=`<h2>Pacotes dos alunos</h2><div class="small">Saldo salvo na Central. Continua válido na virada do mês e após limpar os dados deste aparelho.</div><div class="flex" style="margin:10px 0"><button class="btn primary" id="evpRefreshAll" ${evpBalanceBusy?'disabled':''}>${evpBalanceBusy?'Consultando…':'Atualizar da Central'}</button><button class="btn good" id="evpNewAthlete">+ Cadastrar atleta</button></div>${data.personalBalances?.consultado_em?`<div class="small">Última consulta: ${esc(new Date(data.personalBalances.consultado_em).toLocaleString('pt-BR'))}</div>`:''}${evpManageError?`<div role="status" style="color:#fecaca;margin:8px 0">${esc(evpManageError)}</div>`:''}${pending?`<div style="padding:12px;border:1px solid #d6b13e">Operação aguardando confirmação. Confira antes de lançar outra.<button class="btn primary" id="evpRetryOperation">Confirmar / tentar novamente</button></div>`:''}<div>${arr.length?arr.map(a=>`<div style="padding:12px 0;border-bottom:1px solid #374151"><b>${esc(a.nome)}</b><div>${a.configurado?`${a.contratadas} contratadas · ${a.realizadas} realizadas · <b style="color:#f1cf78">${a.restantes} restantes</b>${a.excedentes?' · '+a.excedentes+' excedentes':''}`:'Configure o pacote e o saldo que faltam hoje.'}</div><div class="flex" style="margin-top:8px"><button class="smallBtn" data-package-id="${esc(a.id)}" data-kind="${a.configurado?'ajustar':'iniciar'}">${a.configurado?'Corrigir saldo':'Configurar saldo inicial'}</button>${a.configurado?`<button class="smallBtn" data-package-id="${esc(a.id)}" data-kind="renovar">Renovar / adicionar aulas</button>`:''}</div></div>`).join(''):'<div class="empty">Salve a conexão e toque em Atualizar da Central para carregar os atletas.</div>'}</div>`;
+ $('evpRefreshAll').onclick=()=>evpRefreshBalances();$('evpNewAthlete').onclick=evpOpenAthlete;
+ if($('evpRetryOperation'))$('evpRetryOperation').onclick=()=>evpSendOperation(evpPendingOperation());
+ el.querySelectorAll('[data-package-id]').forEach(b=>{b.disabled=!!pending||evpManageBusy;b.onclick=()=>evpOpenPackage(b.dataset.packageId,b.dataset.kind)});
+}
+function evpCloseEditor(){ $('evpEditor')?.remove() }
+function evpEditor(content){evpCloseEditor();let el=document.createElement('div');el.id='evpEditor';el.style.cssText='position:fixed;inset:0;background:#000c;z-index:15000;display:flex;align-items:center;justify-content:center;padding:16px';el.innerHTML=`<div class="panel" role="dialog" aria-modal="true" style="width:100%;max-width:480px;max-height:90vh;overflow:auto">${content}<div id="evpEditorError" role="status" style="color:#fecaca;margin:10px 0"></div><div class="flex" style="margin-top:12px"><button class="btn primary" id="evpEditorSave">Salvar na Central</button><button class="btn ghost" id="evpEditorCancel">Cancelar</button></div></div>`;document.body.appendChild(el);$('evpEditorCancel').onclick=evpCloseEditor;return el}
+async function evpOpenPackage(aid,kind){
+ if(evpPendingOperation())return alert('Confirme a operação pendente primeiro.');
+ if(evpPendingFinals().length)return alert('Há treinos aguardando confirmação. Aguarde a sincronização antes de configurar ou corrigir o pacote.');
+ if(!await evpRefreshBalances())return;
+ let a=evpBalance(aid);if(!a)return;
+ if(kind==='iniciar'&&a.configurado)return alert('Este pacote já foi configurado. Use Corrigir saldo.');
+ evpEditor(`<h2>${kind==='renovar'?'Renovar pacote':kind==='ajustar'?'Corrigir saldo':'Configurar saldo inicial'}</h2><b>${esc(a.nome)}</b><p class="small">${kind==='renovar'?'As novas aulas serão adicionadas ao saldo existente. Aulas excedentes serão compensadas.':'Informe o total contratado e quantas aulas ainda faltam hoje. As aulas antigas serão preservadas e não serão descontadas novamente.'}</p><label>${kind==='renovar'?'Novas aulas compradas':'Aulas contratadas no pacote'}</label><input id="evpQty" type="number" min="0" max="1000" value="${kind==='renovar'?4:a.configurado?a.contratadas:4}">${kind==='renovar'?`<p>Saldo atual: <b>${a.restantes}</b> · Excedentes: ${a.excedentes}</p>`:`<label>Aulas restantes hoje</label><input id="evpLeft" type="number" min="0" max="1000" value="${a.configurado?a.restantes:4}">`}<label>Observação</label><input id="evpReason" placeholder="Ex.: início do controle ou renovação">`);
+ $('evpEditorSave').onclick=async()=>{
+  const qty=Number($('evpQty').value),left=kind==='renovar'?0:Number($('evpLeft').value);
+  if(!Number.isInteger(qty)||qty<0||qty>1000||(kind==='renovar'&&qty<1)||!Number.isInteger(left)||left<0||(kind!=='renovar'&&left>qty))return $('evpEditorError').textContent='Confira as quantidades. Restantes não pode superar contratadas.';
+  if(kind==='ajustar'&&!confirm(`Corrigir ${a.nome} para ${qty} contratadas e ${left} restantes?`))return;
+  let item={action:'pacote_operacao',payload:{op_id:'PKG-'+secureToken(18),id:aid,tipo:kind,contratadas:qty,restantes:left,expected_event_id:a.event_id||'',expected_remaining:a.restantes,expected_excedentes:a.excedentes,motivo:$('evpReason').value}};
+  localStorage.setItem('evp_package_pending_v20',JSON.stringify(item));evpCloseEditor();await evpSendOperation(item);
+ };
+}
+function evpOpenAthlete(){
+ if(evpPendingOperation())return alert('Confirme a operação pendente primeiro.');
+ evpEditor('<h2>Cadastrar atleta na Central</h2><label>Nome completo</label><input id="evpAthName"><label>Data de nascimento</label><input id="evpAthBirth" type="date"><p class="small">O responsável acessará pelo link da live, sem cadastro ou senha.</p>');
+ $('evpEditorSave').onclick=async()=>{let nome=$('evpAthName').value.trim();if(!nome)return $('evpEditorError').textContent='Informe o nome.';let item={action:'app_atleta',payload:{id:'EVP-'+secureToken(12),nome,nascimento:$('evpAthBirth').value}};localStorage.setItem('evp_package_pending_v20',JSON.stringify(item));evpCloseEditor();await evpSendOperation(item)};
+}
+async function evpSendOperation(item){
+ if(!item||evpManageBusy)return;evpManageBusy=true;evpManageError='Confirmando a operação na Central…';evpRenderManager();
  try{
-  if(!cfg.url||!cfg.token)throw Error('Configure a URL e o token da Central para consultar o saldo.');
-  if(!navigator.onLine)throw Error('Sem internet. O saldo exibido é da última consulta.');
-  let out=await new Promise((resolve,reject)=>{
-   let cb='evpSaldo_'+Date.now(),script=document.createElement('script'),timer=setTimeout(()=>end(Error('A Central não confirmou o saldo. Tente atualizar novamente.')),15000);
-   function end(err,val){clearTimeout(timer);script.remove();delete window[cb];err?reject(err):resolve(val)}
-   window[cb]=val=>end(null,val);script.onerror=()=>end(Error('Não foi possível consultar o saldo.'));
-   script.src=cfg.url+(cfg.url.includes('?')?'&':'?')+new URLSearchParams({action:'saldo',token:cfg.token,competencia:month,callback:cb,_:Date.now()});document.head.appendChild(script);
-  });
-  if(!out?.ok||!Array.isArray(out.atletas)||out.competencia!==month)throw Error(out?.error||'Resposta de saldo inválida.');
-  data.personalBalances={...out,consultado_em:new Date().toISOString()};localStorage.setItem(KEY,JSON.stringify(data));if(current)current.balanceError='';return true;
- }catch(e){if(current)current.balanceError=e.message;return false}
- finally{evpBalanceBusy=false;evpRenderBalances();if(current?.status==='finished')renderReport()}
+  const isPack=item.action==='pacote_operacao';
+  let out=await evpReadState(item.payload.op_id||'');
+  let confirmed=isPack?out.operacao_confirmada:out.atletas.some(a=>String(a.id)===item.payload.id);
+  if(!confirmed){
+   try{await trainingPostIframe(item.payload,item.action)}catch(e){
+    out=await evpReadState(item.payload.op_id||'');confirmed=isPack?out.operacao_confirmada:out.atletas.some(a=>String(a.id)===item.payload.id);
+    if(!confirmed){if(e.centralRejected){localStorage.removeItem('evp_package_pending_v20');evpApplyState(out);}throw e;}
+   }
+   out=await evpReadState(item.payload.op_id||'');confirmed=isPack?out.operacao_confirmada:out.atletas.some(a=>String(a.id)===item.payload.id);
+  }
+  if(!confirmed)throw Error('A Central ainda não confirmou. Use o botão para conferir / tentar novamente.');
+  evpApplyState(out);localStorage.removeItem('evp_package_pending_v20');evpManageError='Salvo e confirmado na Central.';
+ }catch(e){evpManageError=e.message+(evpPendingOperation()?' A operação foi mantida para conferência.':' Atualize os valores e tente novamente.')}
+ finally{evpManageBusy=false;evpRenderBalances();renderHome()}
 }
 
 function currentMode(){return current?.mode||($('useMode')?.value||'central')}
@@ -1085,7 +1144,7 @@ function openFinishModal(){if(!current)return;let m=met();$("finishSummary").tex
 async function requestFinish(){if(voiceActive)await stopVoice();if(unresolvedVoicePending().length){renderPendingReview();$("pendingReviewModal").classList.add('on');return}openFinishModal()}
 $("date").value=today();
 document.querySelectorAll(".nav button").forEach(b=>b.onclick=async()=>{if(["call","score","report"].includes(b.dataset.s)&&!current)return alert("Prepare um treino primeiro.");if(voiceActive&&b.dataset.s!="score")await stopVoice();show(b.dataset.s)});
-$("gear").onclick=async()=>{if(voiceActive)await stopVoice();show("settings")};$("syncNow").onclick=syncCentralAthletes;$("syncCentral").onclick=syncCentralAthletes;$("syncPending").onclick=()=>syncPendingTrainings(true);$("syncPendingHome").onclick=()=>syncPendingTrainings(true);$("saveCentral").onclick=()=>{if(saveCentralSettings())renderCentralStatus()};$("goCall").onclick=start;$("goScore").onclick=goScore;if($("copyPersonalLive"))$("copyPersonalLive").onclick=copyPersonalLive;if($("sharePersonalLive"))$("sharePersonalLive").onclick=sharePersonalLive;$("voiceToggle").onclick=toggleVoice;$("pocketToggle").onclick=togglePocketMode;$("micTest").onclick=()=>requestMicrophonePermission(true);$("lateAdd").onclick=addLateAthlete;$("editPresence").onclick=async()=>{if(voiceActive)await stopVoice();show("call")};$("backToCall").onclick=()=>show(current&&current.status==='running'?"score":"call");$("saveVoiceNames").onclick=saveVoiceAliases;$("editVoiceNames").onclick=()=>{renderVoiceNames("all");show("voiceNames")};$("finish").onclick=requestFinish;$("undo").onclick=undo;$("cols").onchange=()=>renderScore();
+$("gear").onclick=async()=>{if(voiceActive)await stopVoice();show("settings")};$("syncNow").onclick=()=>evpRefreshBalances();$("syncCentral").onclick=()=>evpRefreshBalances();$("syncPending").onclick=()=>syncPendingTrainings(true);$("syncPendingHome").onclick=()=>syncPendingTrainings(true);$("saveCentral").onclick=()=>{if(saveCentralSettings()){renderCentralStatus();evpRefreshBalances()}};$("goCall").onclick=start;$("goScore").onclick=goScore;if($("copyPersonalLive"))$("copyPersonalLive").onclick=copyPersonalLive;if($("sharePersonalLive"))$("sharePersonalLive").onclick=sharePersonalLive;$("voiceToggle").onclick=toggleVoice;$("pocketToggle").onclick=togglePocketMode;$("micTest").onclick=()=>requestMicrophonePermission(true);$("lateAdd").onclick=addLateAthlete;$("editPresence").onclick=async()=>{if(voiceActive)await stopVoice();show("call")};$("backToCall").onclick=()=>show(current&&current.status==='running'?"score":"call");$("saveVoiceNames").onclick=saveVoiceAliases;$("editVoiceNames").onclick=()=>{renderVoiceNames("all");show("voiceNames")};$("finish").onclick=requestFinish;$("undo").onclick=undo;$("cols").onchange=()=>renderScore();
 $("allPresent").onclick=()=>{if(!current)return;sessionRoster().forEach(a=>current.present[a.id]=true);renderCall()};$("allAbsent").onclick=()=>{if(!current)return;sessionRoster().forEach(a=>current.present[a.id]=false);renderCall()};
 $("quickAdd").onclick=()=>{if(!current)return;let n=prompt(current.mode==='personal'?"Nome avulso (sem abatimento de aulas na Central). Para clientes cadastrados, selecione na chamada:":"Nome completo do atleta temporário para esta chamada:");if(!n||!n.trim())return;let a=addTemporaryAthlete(n,{present:true,role:'atleta'});renderCall();if(a&&current.mode!=='personal')alert("Atleta incluído somente neste treino. Para entrar no histórico oficial mensal da escolinha, cadastre-o também na Central Evolutivo para receber um ID EVE-XXX.")};
 $("addClass").onclick=()=>{let n=$("newClass").value.trim();if(!n)return alert("Digite a turma.");if(data.classes.some(c=>norm(c)==norm(n)))return alert("Turma já existe.");data.classes.push(n);$("newClass").value="";save()};
@@ -1159,8 +1218,8 @@ if($("useMode")){$("useMode").value="personal";$("useMode").dispatchEvent(new Ev
 renderAll();
 refreshMicEnvironment();
 setPocketUI();
-window.addEventListener('online',()=>{evpRetryFinals();if(pendingTrainingQueue().length)syncPendingTrainings(false);if(current?.mode==='personal'&&current?.status==='running'&&current.personalLive)schedulePersonalLiveSync(250)});
+window.addEventListener('online',()=>{evpRefreshBalances();evpRetryFinals();if(pendingTrainingQueue().length)syncPendingTrainings(false);if(current?.mode==='personal'&&current?.status==='running'&&current.personalLive)schedulePersonalLiveSync(250)});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)evpRetryFinals();if(!document.hidden&&current?.mode==='personal'&&current?.status==='running'&&current.personalLive)schedulePersonalLiveSync(400)});
 setInterval(()=>{if(!document.hidden)evpRetryFinals()},60000);
-setTimeout(()=>{evpRetryFinals();if(navigator.onLine&&pendingTrainingQueue().length)syncPendingTrainings(false)},1200);
+setTimeout(()=>{if(centralCfg().token)evpRefreshBalances();evpRetryFinals();if(navigator.onLine&&pendingTrainingQueue().length)syncPendingTrainings(false)},1200);
 </script></body></html>
